@@ -30,19 +30,19 @@ const DashboardPage = async () => {
 
       <div className="flex flex-col lg:flex-row gap-6 mt-6 mx-6">
         {/* Accordion for Boilerplate FAQ */}
-        <div className="flex lg:w-1/4">
+        <div className="flex-1 lg:w-1/4">
           <BoilerplateAccordion />
         </div>
 
         {/* Notifications, Textarea and MeteorsCard */}
-        <div className="flex flex-1 flex-col lg:flex-row gap-6">
-          <div className="flex-1">
-            <Notifications />
-          </div>
-          <div className="flex-1">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 mx-20">
+          <div className="flex-1 mx-28">
             <MeteorsCard />
           </div>
           <div className="flex-1">
+            <Notifications />
+          </div>
+          {/* <div className="flex-1">
             <div className="grid w-full gap-1.5">
               <Label htmlFor="message">Your message</Label>
               <Textarea
@@ -51,7 +51,7 @@ const DashboardPage = async () => {
                 className="w-full"
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
