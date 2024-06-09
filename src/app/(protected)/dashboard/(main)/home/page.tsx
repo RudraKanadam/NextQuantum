@@ -6,8 +6,7 @@ import AuthJsCard from "./_components/AuthJsCard";
 import ShadCnCard from "./_components/ShadCnCard";
 import AcernityCard from "./_components/AcernityCard";
 import BoilerplateAccordion from "./_components/BoilerplateAccordion";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { MeteorsCard } from "./_components/Meteors";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -33,16 +32,13 @@ const DashboardPage = async () => {
           <BoilerplateAccordion />
         </div>
 
-        {/* Notifications and Textarea */}
-        <div className="flex flex-1 flex-col gap-6 lg:flex-row mx-6">
+        {/* Notifications and MeteorsCard */}
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 mx-8">
           <div className="flex-1">
             <Notifications />
           </div>
-          <div className="flex-1 mx-[-18]">
-            <div className="grid w-full gap-6">
-              <Label htmlFor="message">Your message</Label>
-              <Textarea placeholder="Type your message here." id="message" />
-            </div>
+          <div className="flex-1">
+            <MeteorsCard />
           </div>
         </div>
       </div>
