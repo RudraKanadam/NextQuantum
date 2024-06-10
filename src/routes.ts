@@ -17,10 +17,39 @@ export const authRoutes = ["/login", "/register", "/forgot-password"];
  * Routes that start with this prefix are used for API authentication purposes
  * @type {string}
  */
-export const apiAuthPrefix = "/api/auth";
+export const apiAuthPrefix = "/api";
 
 /**
- * Default redirect route after login
+ * Default redirect user role route after login
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard/home";
+export const DEFAULT_USER_LOGIN_REDIRECT = "/user/dashboard/home";
+
+/**
+ * Default redirect  admin role route after login
+ * @type {string}
+ */
+export const DEFAULT_ADMIN_LOGIN_REDIRECT = "/admin/dashboard/home";
+
+/**
+ * Routes accessible by admin users
+ * @type {string[]}
+ */
+export const adminRoutes = [
+  "/admin/dashboard/home",
+  "/admin/dashboard/features",
+  "/admin/dashboard/userManagement",
+  "/admin/dashboard/settings",
+  // Add more admin routes here
+];
+
+/**
+ * Routes accessible by standard users
+ * @type {string[]}
+ */
+export const userRoutes = [
+  "/user/dashboard/home",
+  "/user/dashboard/settings",
+  "/user/dashboard/logs",
+  // Add more user routes here
+];

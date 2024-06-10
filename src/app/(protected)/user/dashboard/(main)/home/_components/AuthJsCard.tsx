@@ -14,7 +14,7 @@ export function AuthJsCard() {
           translateZ="50"
           className="text-xl font-bold text-neutral-600 dark:text-white"
         >
-          Next.js
+          Auth.js
         </CardItem>
         <CardItem
           as="p"

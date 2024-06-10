@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { getToken, GetTokenParams } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 import {
-  DEFAULT_LOGIN_REDIRECT,
+  DEFAULT_USER_LOGIN_REDIRECT,
+  DEFAULT_ADMIN_LOGIN_REDIRECT,
   apiAuthPrefix,
   authRoutes,
   publicRoutes,
+  adminRoutes,
+  userRoutes,
 } from "@/routes";
 
 export default async function middleware(req: NextRequest) {
@@ -27,6 +30,8 @@ export default async function middleware(req: NextRequest) {
   const isApiAuthRoute = pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(pathname);
   const isAuthRoute = authRoutes.includes(pathname);
+  const isAdminRoute = adminRoutes.includes(pathname);
+  const isUserRoute = userRoutes.includes(pathname);
 
   if (isApiAuthRoute) {
     return NextResponse.next();
@@ -34,7 +39,14 @@ export default async function middleware(req: NextRequest) {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, origin));
+      if (token.role === "admin") {
+        return NextResponse.redirect(
+          new URL(DEFAULT_ADMIN_LOGIN_REDIRECT, origin)
+        );
+      }
+      return NextResponse.redirect(
+        new URL(DEFAULT_USER_LOGIN_REDIRECT, origin)
+      );
     }
     return NextResponse.next();
   }
@@ -42,12 +54,21 @@ export default async function middleware(req: NextRequest) {
   if (!isLoggedIn && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", origin));
   }
-  // Redirect based on user role
+
+  // Role-based access control
   if (isLoggedIn && token.role) {
-    if (token.role === "ADMIN" && pathname !== "/adminDashboard") {
-      return NextResponse.redirect(new URL("/adminDashboard", origin));
-    } else if (token.role === "USER" && pathname !== DEFAULT_LOGIN_REDIRECT) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, origin));
+    if (token.role === "admin") {
+      if (!isAdminRoute && pathname !== DEFAULT_ADMIN_LOGIN_REDIRECT) {
+        return NextResponse.redirect(
+          new URL(DEFAULT_ADMIN_LOGIN_REDIRECT, origin)
+        );
+      }
+    } else if (token.role === "user") {
+      if (!isUserRoute && pathname !== DEFAULT_USER_LOGIN_REDIRECT) {
+        return NextResponse.redirect(
+          new URL(DEFAULT_USER_LOGIN_REDIRECT, origin)
+        );
+      }
     }
   }
 

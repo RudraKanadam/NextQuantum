@@ -3,12 +3,16 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { menuOptions } from "@/lib/constants";
+import { useSession } from "next-auth/react";
+import {
+  adminMenuOptions,
+  userMenuOptions,
+  guestMenuOptions,
+} from "@/lib/constants";
 import clsx from "clsx";
 import { Separator } from "@/components/ui/separator";
 import { Database, GitBranch, LucideMousePointerClick } from "lucide-react";
 import { ModeToggle } from "../global/mode-toggle";
-
 import {
   Tooltip,
   TooltipContent,
@@ -19,10 +23,25 @@ import {
 type Props = {};
 
 const MenuOptions: React.FC<Props> = () => {
+  const { data: session } = useSession();
   const pathName = usePathname();
+  const role = session?.user?.role || "guest";
+
+  const getMenuOptions = (role: string) => {
+    switch (role) {
+      case "admin":
+        return adminMenuOptions;
+      case "user":
+        return userMenuOptions;
+      default:
+        return guestMenuOptions;
+    }
+  };
+
+  const menuOptions = getMenuOptions(role);
 
   return (
-    <nav className=" dark:bg-black h-screen overflow-scroll  justify-between flex items-center flex-col  gap-10 py-6 px-2">
+    <nav className="dark:bg-black h-screen overflow-scroll justify-between flex items-center flex-col gap-10 py-6 px-2">
       <div className="flex items-center justify-center flex-col gap-8">
         <Link href="/dashboard/home">
           <aside className="flex items-center gap-[2px]">
@@ -33,7 +52,6 @@ const MenuOptions: React.FC<Props> = () => {
               alt="Boiler Logo"
               className="shadow-sm"
             />
-
             <p className="text-xl font-bold">Plate.</p>
           </aside>
         </Link>
@@ -46,7 +64,7 @@ const MenuOptions: React.FC<Props> = () => {
                     <Link
                       href={menuItem.href}
                       className={clsx(
-                        "group h-8 w-8 flex items-center justify-center  scale-[1.5] rounded-lg p-[3px]  cursor-pointer",
+                        "group h-8 w-8 flex items-center justify-center scale-[1.5] rounded-lg p-[3px] cursor-pointer",
                         {
                           "dark:bg-[#2F006B] bg-[#EEE0FF] ":
                             pathName === menuItem.href,
