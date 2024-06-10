@@ -17,7 +17,7 @@ export const authRoutes = ["/login", "/register", "/forgot-password"];
  * Routes that start with this prefix are used for API authentication purposes
  * @type {string}
  */
-export const apiAuthPrefix = "/api/auth";
+export const apiAuthPrefix = "/api";
 
 /**
  * Default redirect user role route after login
