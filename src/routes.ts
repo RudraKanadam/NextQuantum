@@ -10,7 +10,7 @@ export const publicRoutes = ["/"];
  * These routes will redirect logged-in users to /settings
  * @type {string[]}
  */
-export const authRoutes = ["/login", "/register", "/forgot-password","/adminDashboard/home","/adminDashboard/featureManagement"];
+export const authRoutes = ["/login", "/register", "/forgot-password"];
 
 /**
  * The prefix for API authentication routes
@@ -20,7 +20,36 @@ export const authRoutes = ["/login", "/register", "/forgot-password","/adminDash
 export const apiAuthPrefix = "/api/auth";
 
 /**
- * Default redirect route after login
+ * Default redirect user role route after login
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard/home";
+export const DEFAULT_USER_LOGIN_REDIRECT = "/user/dashboard/home";
+
+/**
+ * Default redirect  admin role route after login
+ * @type {string}
+ */
+export const DEFAULT_ADMIN_LOGIN_REDIRECT = "/admin/dashboard/home";
+
+/**
+ * Routes accessible by admin users
+ * @type {string[]}
+ */
+export const adminRoutes = [
+  "/admin/dashboard/home",
+  "/admin/dashboard/features",
+  "/admin/dashboard/userManagement",
+  "/admin/dashboard/settings",
+  // Add more admin routes here
+];
+
+/**
+ * Routes accessible by standard users
+ * @type {string[]}
+ */
+export const userRoutes = [
+  "/user/dashboard/home",
+  "/user/dashboard/settings",
+  "/user/dashboard/logs",
+  // Add more user routes here
+];

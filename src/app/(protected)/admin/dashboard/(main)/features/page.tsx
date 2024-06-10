@@ -1,7 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import FeatureFlagTable from "@/components/ui/featureFlagTable";
@@ -14,7 +22,11 @@ const FeaturePage = () => {
   const [createdFeature, setCreatedFeature] = useState<any>(null);
 
   const handleCreateFeature = () => {
-    setCreatedFeature({ id: Date.now().toString(), name: newFeatureName, environments: { UAT: false, Dev: false, Prod: false } });
+    setCreatedFeature({
+      id: Date.now().toString(),
+      name: newFeatureName,
+      environments: { UAT: false, Dev: false, Prod: false },
+    });
     setIsDialogOpen(false);
     setIsLogicModalOpen(true);
   };
@@ -32,7 +44,9 @@ const FeaturePage = () => {
       <div className="flex justify-end mb-4">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => setIsDialogOpen(true)}>Create Feature</Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              Create Feature
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -51,7 +65,9 @@ const FeaturePage = () => {
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
               <Button onClick={handleCreateFeature}>Create</Button>
             </DialogFooter>
           </DialogContent>

@@ -1,0 +1,8 @@
+1. Subscription mgt system -> FMS getting all the subs and regions
+2. No need of manual entry
+3. Client Application FMS flag by subscription we are capable of filter those
+4. Synced with User Subscription
+5.Live data in sync with FMS - Diagram changes
+6. reverse arrow marks for apps to FMS
+7. API - APP calling FMS flag and storing in browser - Show in DEMO
+8. Default Flag

@@ -1,17 +1,39 @@
 "use client";
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import FeatureLogicModal from './FeatureLogicModal';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import FeatureLogicModal from "./FeatureLogicModal";
 
-type Environment = 'UAT' | 'Dev' | 'Prod';
+type Environment = "UAT" | "Dev" | "Prod";
 
 const dummyData = [
-  { id: '1', name: 'Feature A', environments: { UAT: true, Dev: false, Prod: true } },
-  { id: '2', name: 'Feature B', environments: { UAT: false, Dev: true, Prod: false } },
+  {
+    id: "1",
+    name: "Feature A",
+    environments: { UAT: true, Dev: false, Prod: true },
+  },
+  {
+    id: "2",
+    name: "Feature B",
+    environments: { UAT: false, Dev: true, Prod: false },
+  },
 ];
 
 const FeatureFlagTable: React.FC = () => {
@@ -24,15 +46,19 @@ const FeatureFlagTable: React.FC = () => {
 
   const handleToggle = () => {
     if (selectedFeature && selectedEnv) {
-      setFeatures(features.map(feature => 
-        feature.id === selectedFeature.id ? { 
-          ...feature, 
-          environments: { 
-            ...feature.environments, 
-            [selectedEnv]: !feature.environments[selectedEnv]
-          }
-        } : feature
-      ));
+      setFeatures(
+        features.map((feature) =>
+          feature.id === selectedFeature.id
+            ? {
+                ...feature,
+                environments: {
+                  ...feature.environments,
+                  [selectedEnv]: !feature.environments[selectedEnv],
+                },
+              }
+            : feature
+        )
+      );
     }
     setIsAlertOpen(false);
   };
@@ -59,7 +85,7 @@ const FeatureFlagTable: React.FC = () => {
 
   return (
     <div className="overflow-auto">
-      <table className="min-w-full bg-white dark:bg-black shadow-md rounded-lg text-gray-900 dark:text-white">
+      <table className="min-w-full bg-white dark:bg-black shadow-md rounded-lg text-gray-900 dark:text-white border rounder-3xl">
         <thead>
           <tr>
             <th className="py-3 px-6 text-left">Feature Name</th>
@@ -79,46 +105,78 @@ const FeatureFlagTable: React.FC = () => {
               <td className="py-3 px-6">{feature.name}</td>
               <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
-                  <p className={`text-sm ${feature.environments.UAT ? 'text-green-500' : 'text-red-500'}`}>
-                    {feature.environments.UAT ? 'On' : 'Off'}
+                  <p
+                    className={`text-sm ${
+                      feature.environments.UAT
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.environments.UAT ? "On" : "Off"}
                   </p>
                   <Switch
                     checked={feature.environments.UAT}
-                    onCheckedChange={() => handleToggleClick(feature, 'UAT')}
+                    onCheckedChange={() => handleToggleClick(feature, "UAT")}
                   />
                 </div>
               </td>
               <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
-                  <p className={`text-sm ${feature.environments.Dev ? 'text-green-500' : 'text-red-500'}`}>
-                    {feature.environments.Dev ? 'On' : 'Off'}
+                  <p
+                    className={`text-sm ${
+                      feature.environments.Dev
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.environments.Dev ? "On" : "Off"}
                   </p>
                   <Switch
                     checked={feature.environments.Dev}
-                    onCheckedChange={() => handleToggleClick(feature, 'Dev')}
+                    onCheckedChange={() => handleToggleClick(feature, "Dev")}
                   />
                 </div>
               </td>
               <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
-                  <p className={`text-sm ${feature.environments.Prod ? 'text-green-500' : 'text-red-500'}`}>
-                    {feature.environments.Prod ? 'On' : 'Off'}
+                  <p
+                    className={`text-sm ${
+                      feature.environments.Prod
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.environments.Prod ? "On" : "Off"}
                   </p>
                   <Switch
                     checked={feature.environments.Prod}
-                    onCheckedChange={() => handleToggleClick(feature, 'Prod')}
+                    onCheckedChange={() => handleToggleClick(feature, "Prod")}
                   />
                 </div>
               </td>
               <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">...</Button>
+                    <Button variant="ghost" size="sm">
+                      ...
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleLogicClick(feature)}>Logic</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => console.log(`Edit feature ${feature.id}`)}>Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => console.log(`Delete feature ${feature.id}`)}>Delete</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleLogicClick(feature)}>
+                      Logic
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => console.log(`Edit feature ${feature.id}`)}
+                    >
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        console.log(`Delete feature ${feature.id}`)
+                      }
+                    >
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </td>
@@ -136,12 +194,22 @@ const FeatureFlagTable: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Toggle</AlertDialogTitle>
             <AlertDialogDescription>
-              {`Are you sure you want to ${selectedFeature?.environments[selectedEnv!] ? 'turn off' : 'turn on'} the feature ${selectedFeature?.name} for ${selectedEnv} environment?`}
+              {`Are you sure you want to ${
+                selectedFeature?.environments[selectedEnv!]
+                  ? "turn off"
+                  : "turn on"
+              } the feature ${
+                selectedFeature?.name
+              } for ${selectedEnv} environment?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsAlertOpen(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleToggle}>Confirm</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setIsAlertOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleToggle}>
+              Confirm
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
