@@ -2,8 +2,12 @@
 import { z } from "zod";
 import { loginSchema } from "@/validatorSchema";
 import { signIn } from "@/auth";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import {
+  DEFAULT_USER_LOGIN_REDIRECT,
+  DEFAULT_ADMIN_LOGIN_REDIRECT,
+} from "@/routes";
 import { AuthError } from "next-auth";
+import { getUserByEmail } from "@/data/user"; // Ensure this path is correct
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
   try {
@@ -24,7 +28,19 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
       return { error: result.error };
     }
 
-    return { success: "Login Success", redirect: DEFAULT_LOGIN_REDIRECT };
+    // Fetch the user information to get the role
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return { error: "User not found!" };
+    }
+
+    // Determine the redirect URL based on the user's role
+    const redirectUrl =
+      user.role === "admin"
+        ? DEFAULT_ADMIN_LOGIN_REDIRECT
+        : DEFAULT_USER_LOGIN_REDIRECT;
+
+    return { success: "Login Success", redirect: redirectUrl };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
