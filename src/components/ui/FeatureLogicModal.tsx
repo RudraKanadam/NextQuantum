@@ -6,12 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 const FeatureLogicModal = ({ feature, onClose }: any) => {
   const [selection, setSelection] = useState('Users');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [operator, setOperator] = useState('==');
+  const [isUATEnabled, setIsUATEnabled] = useState(false);
+  const [isDEVEnabled, setIsDEVEnabled] = useState(false);
+  const [isPRODEnabled, setIsPRODEnabled] = useState(false);
 
   const handleSelectionChange = (value: string) => {
     setSelection(value);
@@ -53,15 +57,20 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
           <TabsContent value="UAT">
             <Card>
               <CardHeader>
-                <CardTitle>UAT Logic</CardTitle>
-                <CardDescription>
-                  Configure the UAT logic for the feature {feature.name}.
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>UAT Logic</CardTitle>
+                    <CardDescription>
+                      Configure the UAT logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch checked={isUATEnabled} onCheckedChange={setIsUATEnabled} />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Selection</Label>
-                  <Select onValueChange={handleSelectionChange} defaultValue={selection}>
+                  <Select onValueChange={handleSelectionChange} defaultValue={selection} disabled={!isUATEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
@@ -73,7 +82,7 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 </div>
                 <div className="space-y-2">
                   <Label>Operator</Label>
-                  <Select onValueChange={handleOperatorChange} defaultValue={operator}>
+                  <Select onValueChange={handleOperatorChange} defaultValue={operator} disabled={!isUATEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an operator" />
                     </SelectTrigger>
@@ -88,8 +97,8 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
-                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" />
-                    <Button onClick={handleAddTag}>Add</Button>
+                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" disabled={!isUATEnabled} />
+                    <Button onClick={handleAddTag} disabled={!isUATEnabled}>Add</Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {tags.map((tag) => (
@@ -111,15 +120,20 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
           <TabsContent value="DEV">
             <Card>
               <CardHeader>
-                <CardTitle>DEV Logic</CardTitle>
-                <CardDescription>
-                  Configure the DEV logic for the feature {feature.name}.
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>DEV Logic</CardTitle>
+                    <CardDescription>
+                      Configure the DEV logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch checked={isDEVEnabled} onCheckedChange={setIsDEVEnabled} />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Selection</Label>
-                  <Select onValueChange={handleSelectionChange} defaultValue={selection}>
+                  <Select onValueChange={handleSelectionChange} defaultValue={selection} disabled={!isDEVEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
@@ -131,7 +145,7 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 </div>
                 <div className="space-y-2">
                   <Label>Operator</Label>
-                  <Select onValueChange={handleOperatorChange} defaultValue={operator}>
+                  <Select onValueChange={handleOperatorChange} defaultValue={operator} disabled={!isDEVEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an operator" />
                     </SelectTrigger>
@@ -146,8 +160,8 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
-                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" />
-                    <Button onClick={handleAddTag}>Add</Button>
+                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" disabled={!isDEVEnabled} />
+                    <Button onClick={handleAddTag} disabled={!isDEVEnabled}>Add</Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {tags.map((tag) => (
@@ -169,15 +183,20 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
           <TabsContent value="PROD">
             <Card>
               <CardHeader>
-                <CardTitle>PROD Logic</CardTitle>
-                <CardDescription>
-                  Configure the PROD logic for the feature {feature.name}.
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>PROD Logic</CardTitle>
+                    <CardDescription>
+                      Configure the PROD logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch checked={isPRODEnabled} onCheckedChange={setIsPRODEnabled} />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Selection</Label>
-                  <Select onValueChange={handleSelectionChange} defaultValue={selection}>
+                  <Select onValueChange={handleSelectionChange} defaultValue={selection} disabled={!isPRODEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
@@ -189,7 +208,7 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 </div>
                 <div className="space-y-2">
                   <Label>Operator</Label>
-                  <Select onValueChange={handleOperatorChange} defaultValue={operator}>
+                  <Select onValueChange={handleOperatorChange} defaultValue={operator} disabled={!isPRODEnabled}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an operator" />
                     </SelectTrigger>
@@ -204,8 +223,8 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                 <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
-                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" />
-                    <Button onClick={handleAddTag}>Add</Button>
+                    <Input value={tagInput} onChange={handleTagInputChange} placeholder="Add a tag" disabled={!isPRODEnabled} />
+                    <Button onClick={handleAddTag} disabled={!isPRODEnabled}>Add</Button>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {tags.map((tag) => (
@@ -231,4 +250,3 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
 };
 
 export default FeatureLogicModal;
-

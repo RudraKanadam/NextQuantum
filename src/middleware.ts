@@ -43,13 +43,13 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", origin));
   }
   // Redirect based on user role
-  if (isLoggedIn && token.role) {
-    if (token.role === "ADMIN" && pathname !== "/adminDashboard") {
-      return NextResponse.redirect(new URL("/adminDashboard", origin));
-    } else if (token.role === "USER" && pathname !== DEFAULT_LOGIN_REDIRECT) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, origin));
-    }
-  }
+  // if (isLoggedIn && token.role) {
+  //   if (token.role === "ADMIN" && pathname !== "/adminDashboard") {
+  //     return NextResponse.redirect(new URL("/adminDashboard", origin));
+  //   } else if (token.role === "USER" && pathname !== DEFAULT_LOGIN_REDIRECT) {
+  //     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, origin));
+  //   }
+  // }
 
   return NextResponse.next();
 }

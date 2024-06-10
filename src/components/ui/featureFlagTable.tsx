@@ -1,9 +1,10 @@
 "use client";
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import FeatureLogicModal from './FeatureLogicModal';
 
 type Environment = 'UAT' | 'Dev' | 'Prod';
@@ -14,6 +15,7 @@ const dummyData = [
 ];
 
 const FeatureFlagTable: React.FC = () => {
+  const router = useRouter();
   const [features, setFeatures] = useState(dummyData);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
   const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
@@ -51,6 +53,10 @@ const FeatureFlagTable: React.FC = () => {
     setSelectedFeature(null);
   };
 
+  const handleRowClick = (featureId: string) => {
+    router.push(`/feature/${featureId}`);
+  };
+
   return (
     <div className="overflow-auto">
       <table className="min-w-full bg-white dark:bg-black shadow-md rounded-lg text-gray-900 dark:text-white">
@@ -65,9 +71,13 @@ const FeatureFlagTable: React.FC = () => {
         </thead>
         <tbody>
           {features.map((feature) => (
-            <tr key={feature.id} className="border-t border-gray-200 dark:border-gray-700">
+            <tr
+              key={feature.id}
+              className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+              onClick={() => handleRowClick(feature.id)}
+            >
               <td className="py-3 px-6">{feature.name}</td>
-              <td className="py-3 px-6">
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
                   <p className={`text-sm ${feature.environments.UAT ? 'text-green-500' : 'text-red-500'}`}>
                     {feature.environments.UAT ? 'On' : 'Off'}
@@ -78,7 +88,7 @@ const FeatureFlagTable: React.FC = () => {
                   />
                 </div>
               </td>
-              <td className="py-3 px-6">
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
                   <p className={`text-sm ${feature.environments.Dev ? 'text-green-500' : 'text-red-500'}`}>
                     {feature.environments.Dev ? 'On' : 'Off'}
@@ -89,7 +99,7 @@ const FeatureFlagTable: React.FC = () => {
                   />
                 </div>
               </td>
-              <td className="py-3 px-6">
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center space-x-2">
                   <p className={`text-sm ${feature.environments.Prod ? 'text-green-500' : 'text-red-500'}`}>
                     {feature.environments.Prod ? 'On' : 'Off'}
@@ -100,7 +110,7 @@ const FeatureFlagTable: React.FC = () => {
                   />
                 </div>
               </td>
-              <td className="py-3 px-6">
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">...</Button>
