@@ -23,11 +23,17 @@ export const register = async (values: z.infer<typeof registerSchema>) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create the user with a Basic subscription
     const user = await db.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
+        subscription: {
+          create: {
+            type: "Basic",
+          },
+        },
       },
     });
 
@@ -38,5 +44,4 @@ export const register = async (values: z.infer<typeof registerSchema>) => {
     console.error(error);
     return { error: "An error occurred during registration" };
   }
-  console.log(name, email, password);
 };

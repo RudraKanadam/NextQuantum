@@ -1,9 +1,13 @@
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { UserRole } from "@prisma/client";
+import { UserRole, SubscriptionType } from "@prisma/client";
+
 export const getUserByEmail = async (email: string) => {
   try {
-    const user = await db.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({
+      where: { email },
+      include: { subscription: true },
+    });
     return user;
   } catch (error) {
     console.error("Error fetching user by email:", error);
@@ -13,7 +17,10 @@ export const getUserByEmail = async (email: string) => {
 
 export const getUserById = async (id: string) => {
   try {
-    const user = await db.user.findUnique({ where: { id } });
+    const user = await db.user.findUnique({
+      where: { id },
+      include: { subscription: true },
+    });
     return user;
   } catch (error) {
     console.error("Error fetching user by id:", error);
@@ -23,10 +30,11 @@ export const getUserById = async (id: string) => {
 
 export const getAllUsers = async () => {
   try {
-    const users = await db.user.findMany();
+    const users = await db.user.findMany({
+      include: { subscription: true },
+    });
     console.log(users);
     return users;
-    console.log(users);
   } catch (error) {
     console.error("Error fetching all users:", error);
     return [];
@@ -37,7 +45,8 @@ export const createUser = async (
   name: string,
   email: string,
   password: string,
-  role: UserRole
+  role: UserRole,
+  subscriptionType: SubscriptionType // Add subscription type parameter
 ) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -47,6 +56,14 @@ export const createUser = async (
         email,
         password: hashedPassword,
         role,
+        subscription: {
+          create: {
+            type: subscriptionType, // Use provided subscription type
+          },
+        },
+      },
+      include: {
+        subscription: true,
       },
     });
     return newUser;
@@ -61,10 +78,15 @@ export const updateUser = async (
   name: string,
   email: string,
   password: string,
-  role: UserRole
+  role: UserRole,
+  subscriptionType: SubscriptionType // Add subscription type for update
 ) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log("Updating user:", { id, name, email, role, subscriptionType });
+
+    // Update user details
     const updatedUser = await db.user.update({
       where: { id },
       data: {
@@ -73,14 +95,58 @@ export const updateUser = async (
         password: hashedPassword,
         role,
       },
+      include: {
+        subscription: true,
+      },
     });
-    return updatedUser;
+
+    console.log("User updated:", updatedUser);
+
+    // Update or create the subscription
+    if (updatedUser.subscriptionId) {
+      console.log(
+        "Updating existing subscription:",
+        updatedUser.subscriptionId
+      );
+      await db.subscription.update({
+        where: { id: updatedUser.subscriptionId },
+        data: {
+          type: subscriptionType,
+        },
+      });
+    } else {
+      console.log("Creating new subscription for user:", updatedUser.id);
+      const newSubscription = await db.subscription.create({
+        data: {
+          type: subscriptionType,
+          user: {
+            connect: { id: updatedUser.id },
+          },
+        },
+      });
+
+      // Update user with new subscription ID
+      await db.user.update({
+        where: { id: updatedUser.id },
+        data: {
+          subscriptionId: newSubscription.id,
+        },
+      });
+    }
+
+    // Fetch and return the updated user
+    const finalUser = await db.user.findUnique({
+      where: { id },
+      include: { subscription: true },
+    });
+
+    console.log("Final updated user:", finalUser);
+    return finalUser;
   } catch (error) {
     console.error("Error updating user:", error);
     return null;
   }
 };
-
 export const deleteUser = async (id: string) => {
   try {
     await db.user.delete({
