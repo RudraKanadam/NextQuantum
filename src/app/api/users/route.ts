@@ -15,9 +15,22 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json();
-    const newUser = await createUser(name, email, password, role);
-    return NextResponse.json(newUser, { status: 201 });
+    const { name, email, password, role, subscriptionType } = await req.json();
+    const newUser = await createUser(
+      name,
+      email,
+      password,
+      role,
+      subscriptionType
+    );
+    if (newUser) {
+      return NextResponse.json(newUser, { status: 201 });
+    } else {
+      return NextResponse.json(
+        { error: "Error creating user" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     return NextResponse.json({ error: "Error creating user" }, { status: 500 });
   }
@@ -25,9 +38,35 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const { id, name, email, password, role } = await req.json();
-    const updatedUser = await updateUser(id, name, email, password, role);
-    return NextResponse.json(updatedUser, { status: 200 });
+    const { id, name, email, password, role, subscriptionType } =
+      await req.json();
+
+    console.log("Received data for update:", {
+      id,
+      name,
+      email,
+      password,
+      role,
+      subscriptionType,
+    });
+
+    const updatedUser = await updateUser(
+      id,
+      name,
+      email,
+      password,
+      role,
+      subscriptionType
+    );
+
+    if (updatedUser) {
+      return NextResponse.json(updatedUser, { status: 200 });
+    } else {
+      return NextResponse.json(
+        { error: "Error updating user" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     return NextResponse.json({ error: "Error updating user" }, { status: 500 });
   }

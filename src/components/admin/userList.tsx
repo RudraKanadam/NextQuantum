@@ -1,20 +1,26 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+
+type Subscription = {
+  type: string;
+  startDate: string;
+  endDate?: string;
+};
 
 type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   password: string;
   role: string;
+  subscription: Subscription;
 };
 
 type UserListProps = {
   users: User[];
   onEdit: (user: User) => void;
-  onDelete: (userId: number) => void;
+  onDelete: (userId: string) => void;
 };
 
 const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete }) => {
@@ -35,6 +41,9 @@ const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete }) => {
             <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 text-left">
               Role
             </th>
+            <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 text-left">
+              Subscription
+            </th>
             <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 text-left rounded-tr-lg">
               Actions
             </th>
@@ -54,6 +63,9 @@ const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete }) => {
               </td>
               <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
                 {user.role}
+              </td>
+              <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
+                {user.subscription.type}
               </td>
               <td className="py-2 px-4 border-b border-gray-200 dark:border-gray-700">
                 <button

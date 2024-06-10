@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Book, Headphones, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,14 +9,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { signOut } from "@/auth";
+import { signOut } from "next-auth/react"; // Update the import path if necessary
 
 type Props = {};
 
 const InfoBar = (props: Props) => {
   const handleSignOut = async () => {
-    "use server";
-    await signOut();
+    await signOut({ callbackUrl: "/login" }); // Adjust the callback URL if necessary
   };
 
   return (

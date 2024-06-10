@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogFooter,
@@ -12,13 +11,21 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { RxCross2 } from "react-icons/rx";
+import { Button } from "@/components/ui/button";
+
+type Subscription = {
+  type: string;
+  startDate: string;
+  endDate?: string;
+};
 
 type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   password: string;
   role: string;
+  subscription: Subscription;
 };
 
 type UserFormProps = {
@@ -33,14 +40,17 @@ const UserForm: React.FC<UserFormProps> = ({
   onClose,
 }) => {
   const [user, setUser] = useState<User>(initialUser);
+  const [open, setOpen] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(user);
+    setOpen(false);
+    onClose();
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{user.id ? "Edit User" : "Add New User"}</DialogTitle>
@@ -97,19 +107,34 @@ const UserForm: React.FC<UserFormProps> = ({
               <option value="user">User</option>
             </select>
           </div>
-          <DialogFooter>
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          <div className="mb-4">
+            <label className="block text-gray-700 dark:text-gray-300">
+              Subscription
+            </label>
+            <select
+              value={user.subscription.type}
+              onChange={(e) =>
+                setUser({
+                  ...user,
+                  subscription: { ...user.subscription, type: e.target.value },
+                })
+              }
+              className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-2"
             >
-              Save
-            </button>
+              <option value="Basic">Basic</option>
+              <option value="Premium">Premium</option>
+              <option value="Teams">Teams</option>
+              <option value="Enterprise">Enterprise</option>
+            </select>
+          </div>
+          <DialogFooter>
+            <Button type="submit">Save</Button>
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <RxCross2 className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
           </DialogFooter>
         </form>
-        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <RxCross2 className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogClose>
       </DialogContent>
     </Dialog>
   );

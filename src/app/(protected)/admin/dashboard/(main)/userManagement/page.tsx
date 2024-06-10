@@ -4,12 +4,19 @@ import React, { useState, useEffect } from "react";
 import UserForm from "@/components/admin/userForm";
 import UserList from "@/components/admin/userList";
 
+type Subscription = {
+  type: string;
+  startDate: string;
+  endDate?: string;
+};
+
 type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   password: string;
   role: string;
+  subscription: Subscription;
 };
 
 const UserManagement = () => {
@@ -42,12 +49,17 @@ const UserManagement = () => {
 
   const handleSaveUser = async (updatedUser: User) => {
     try {
+      console.log("Updating user:", updatedUser);
+
       const response = await fetch("/api/users", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedUser),
+        body: JSON.stringify({
+          ...updatedUser,
+          subscriptionType: updatedUser.subscription.type,
+        }),
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -69,7 +81,10 @@ const UserManagement = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newUser),
+        body: JSON.stringify({
+          ...newUser,
+          subscriptionType: newUser.subscription.type, // Pass subscription type
+        }),
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -82,7 +97,7 @@ const UserManagement = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (userId: string) => {
     try {
       const response = await fetch("/api/users", {
         method: "DELETE",
@@ -113,11 +128,15 @@ const UserManagement = () => {
       <button
         onClick={() =>
           setNewUser({
-            id: 0,
+            id: "",
             name: "",
             email: "",
             password: "",
             role: "user",
+            subscription: {
+              type: "Basic",
+              startDate: new Date().toISOString(),
+            },
           })
         }
         className="mt-4 w-28 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"

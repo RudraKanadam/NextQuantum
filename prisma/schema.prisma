@@ -13,9 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole{
+enum UserRole {
   admin
   user
+}
+
+enum SubscriptionType {
+  Basic
+  Premium
+  Teams
+  Enterprise
 }
 
 model User {
@@ -25,8 +32,10 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   password      String?
-  role          UserRole @default(user)
+  role          UserRole  @default(user)
   accounts      Account[]
+  subscription  Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String? @unique
 
   @@map("users")
 }
@@ -49,4 +58,14 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+model Subscription {
+  id           String           @id @default(cuid())
+  type         SubscriptionType @default(Basic)
+  startDate    DateTime         @default(now())
+  endDate      DateTime?
+  user         User?
+
+  @@map("subscriptions")
 }
