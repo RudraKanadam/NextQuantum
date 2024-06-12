@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SeparatorWithOr from "@/components/ui/seperatorWithOr";
 
 enum SubscriptionType {
   Basic = "Basic",
@@ -54,9 +55,10 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
         <div className="space-y-2">
           <Label>Subscription Type</Label>
           <Select
-            onValueChange={(value: SubscriptionType) =>
-              setSubscriptionType(value)
-            }
+            onValueChange={(value: SubscriptionType) => {
+              setSubscriptionType(value);
+              setSubscriptionId(""); // Clear subscription ID when a type is selected
+            }}
             defaultValue={subscriptionType || ""}
             disabled={!isEnabled}
           >
@@ -72,12 +74,16 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
               </SelectItem>
             </SelectContent>
           </Select>
+          <SeparatorWithOr />
           <Label>Subscription ID</Label>
           <Input
             value={subscriptionId || ""}
-            onChange={(e) => setSubscriptionId(e.target.value)}
+            onChange={(e) => {
+              setSubscriptionId(e.target.value);
+              setSubscriptionType(null); // Clear subscription type when an ID is entered
+            }}
             placeholder="Enter subscription ID"
-            disabled={!isEnabled}
+            disabled={!isEnabled || subscriptionType !== null} // Disable if a subscription type is selected
           />
         </div>
       )}
