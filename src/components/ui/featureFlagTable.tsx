@@ -23,22 +23,19 @@ import FeatureLogicModal from "./FeatureLogicModal";
 
 type Environment = "UAT" | "Dev" | "Prod";
 
-const dummyData = [
-  {
-    id: "1",
-    name: "Feature A",
-    environments: { UAT: true, Dev: false, Prod: true },
-  },
-  {
-    id: "2",
-    name: "Feature B",
-    environments: { UAT: false, Dev: true, Prod: false },
-  },
-];
+interface Feature {
+  id: string;
+  name: string;
+  environments: { UAT: boolean; Dev: boolean; Prod: boolean };
+}
 
-const FeatureFlagTable: React.FC = () => {
+interface FeatureFlagTableProps {
+  features: Feature[];
+}
+
+const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   const router = useRouter();
-  const [features, setFeatures] = useState(dummyData);
+  const [featureList, setFeatureList] = useState(features);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
   const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,8 +43,8 @@ const FeatureFlagTable: React.FC = () => {
 
   const handleToggle = () => {
     if (selectedFeature && selectedEnv) {
-      setFeatures(
-        features.map((feature) =>
+      setFeatureList(
+        featureList.map((feature) =>
           feature.id === selectedFeature.id
             ? {
                 ...feature,
@@ -96,7 +93,7 @@ const FeatureFlagTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {features.map((feature) => (
+          {featureList.map((feature) => (
             <tr
               key={feature.id}
               className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"

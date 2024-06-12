@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
     setOperator(value);
   };
 
-  const handleConfirm = () => {
-    console.log(`Confirmed with ${selection}, operator ${operator}, and tags: ${tags.join(', ')}`);
-    onClose();
-  };
-
   const handleTagInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(event.target.value);
   };
@@ -43,6 +39,39 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
 
   const handleRemoveTag = (tag: string) => {
     setTags(tags.filter(t => t !== tag));
+  };
+
+  const handleConfirm = async () => {
+    const environments = [
+      { name: 'UAT', enabled: isUATEnabled },
+      { name: 'Dev', enabled: isDEVEnabled },
+      { name: 'Prod', enabled: isPRODEnabled },
+    ];
+
+    try {
+      for (const env of environments) {
+        if (env.enabled) {
+          await fetch('/api/features', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: feature.name,
+              environment: env.name,
+              status: true,
+              subscriptionType: selection,
+              subscriptionId: null,
+              userId: null,
+            }),
+          });
+        }
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error creating feature:', error);
+    }
   };
 
   return (
