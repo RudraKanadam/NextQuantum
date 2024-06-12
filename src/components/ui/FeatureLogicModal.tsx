@@ -14,8 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import FeatureTypeSelect from "./featureTypeSelect";
 import { Input } from "./input";
+import { useRouter } from "next/navigation"; // Import the useRouter hook
 
 const FeatureLogicModal = ({ feature, onClose }: any) => {
+  const router = useRouter(); // Initialize the router
   const [selection, setSelection] = useState("Global");
   const [isUATEnabled, setIsUATEnabled] = useState(false);
   const [isDEVEnabled, setIsDEVEnabled] = useState(false);
@@ -57,6 +59,7 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
       }
 
       onClose();
+      location.reload(); // Refresh the page after feature creation
     } catch (error) {
       console.error("Error creating feature:", error);
     }
