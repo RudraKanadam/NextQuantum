@@ -54,18 +54,28 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
     setFeatureList(initializedFeatures);
   }, [features]);
 
-  const handleToggle = () => {
-    if (selectedFeature && selectedEnv) {
-      setFeatureList(
-        featureList.map((feature) =>
-          feature.id === selectedFeature.id
-            ? {
-                ...feature,
-                status: !feature.status,
-              }
-            : feature
-        )
-      );
+  const handleToggle = async () => {
+    if (selectedFeature) {
+      const updatedFeature = await fetch("/api/features/updateStatus", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: selectedFeature.id,
+          status: !selectedFeature.status,
+        }),
+      }).then((res) => res.json());
+
+      if (updatedFeature) {
+        setFeatureList(
+          featureList.map((feature) =>
+            feature.id === selectedFeature.id
+              ? { ...feature, status: updatedFeature.status }
+              : feature
+          )
+        );
+      }
     }
     setIsAlertOpen(false);
   };
@@ -96,8 +106,8 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
         <thead>
           <tr>
             <th className="py-3 px-6 text-left">Feature Name</th>
-            <th className="py-3 px-6 text-left">UAT</th>
             <th className="py-3 px-6 text-left">Dev</th>
+            <th className="py-3 px-6 text-left">UAT</th>
             <th className="py-3 px-6 text-left">Production</th>
             <th className="py-3 px-6 text-left">Settings</th>
           </tr>
@@ -114,25 +124,6 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
-                      feature.environment === "UAT" && feature.status
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {feature.environment === "UAT" && feature.status
-                      ? "On"
-                      : "Off"}
-                  </p>
-                  <Switch
-                    checked={feature.environment === "UAT" && feature.status}
-                    onCheckedChange={() => handleToggleClick(feature, "UAT")}
-                  />
-                </div>
-              </td>
-              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center space-x-2">
-                  <p
-                    className={`text-sm ${
                       feature.environment === "Dev" && feature.status
                         ? "text-green-500"
                         : "text-red-500"
@@ -145,6 +136,25 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                   <Switch
                     checked={feature.environment === "Dev" && feature.status}
                     onCheckedChange={() => handleToggleClick(feature, "Dev")}
+                  />
+                </div>
+              </td>
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center space-x-2">
+                  <p
+                    className={`text-sm ${
+                      feature.environment === "UAT" && feature.status
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.environment === "UAT" && feature.status
+                      ? "On"
+                      : "Off"}
+                  </p>
+                  <Switch
+                    checked={feature.environment === "UAT" && feature.status}
+                    onCheckedChange={() => handleToggleClick(feature, "UAT")}
                   />
                 </div>
               </td>

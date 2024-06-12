@@ -125,6 +125,20 @@ export const updateFeature = async (
   }
 };
 
+export const updateFeatureStatus = async (id: string, status: boolean) => {
+  try {
+    const updatedFeature = await db.feature.update({
+      where: { id },
+      data: { status },
+      include: { subscription: true, user: true },
+    });
+    return updatedFeature;
+  } catch (error) {
+    console.error("Error updating feature status:", error);
+    return null;
+  }
+};
+
 export const deleteFeature = async (id: string) => {
   try {
     await db.feature.delete({
