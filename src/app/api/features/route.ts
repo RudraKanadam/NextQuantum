@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  getFeatureById,
-  getAllFeatures,
-  createFeature,
-  updateFeature,
-  deleteFeature,
-} from "@/data/feature";
+import { getAllFeatures, createFeature } from "@/data/feature";
 
 // GET all features
 export async function GET() {
@@ -23,26 +17,13 @@ export async function GET() {
 // POST create a new feature
 export async function POST(req: Request) {
   try {
-    const {
-      name,
-      description,
-      environment,
-      status,
-      featureType,
-      subscriptionType,
-      subscriptionId,
-      userId,
-    } = await req.json();
+    const { name, description, status, conditions } = await req.json();
 
     const newFeature = await createFeature(
       name,
       description,
-      environment,
       status,
-      featureType,
-      subscriptionType,
-      subscriptionId,
-      userId
+      conditions
     );
 
     if (newFeature) {
@@ -56,70 +37,6 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: "Error creating feature" },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT update a feature
-export async function PUT(req: Request) {
-  try {
-    const {
-      id,
-      name,
-      description,
-      environment,
-      status,
-      featureType,
-      subscriptionType,
-      subscriptionId,
-      userId,
-    } = await req.json();
-
-    const updatedFeature = await updateFeature(
-      id,
-      name,
-      description,
-      environment,
-      status,
-      featureType,
-      subscriptionType,
-      subscriptionId,
-      userId
-    );
-
-    if (updatedFeature) {
-      return NextResponse.json(updatedFeature, { status: 200 });
-    } else {
-      return NextResponse.json(
-        { error: "Error updating feature" },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Error updating feature" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE a feature
-export async function DELETE(req: Request) {
-  try {
-    const { id } = await req.json();
-    const success = await deleteFeature(id);
-    if (success) {
-      return NextResponse.json({ message: "Feature deleted" }, { status: 200 });
-    } else {
-      return NextResponse.json(
-        { error: "Error deleting feature" },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Error deleting feature" },
       { status: 500 }
     );
   }
