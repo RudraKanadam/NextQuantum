@@ -149,7 +149,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-// DELETE a feature
+// DELETE a feature// DELETE a feature
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();

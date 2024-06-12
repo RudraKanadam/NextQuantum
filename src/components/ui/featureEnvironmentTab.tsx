@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import FeatureTypeSelect from "./featureTypeSelect";
-import TagsInput from "./featureTagsInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -19,6 +18,12 @@ interface EnvironmentTabProps {
   setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   description: string;
   setDescription: React.Dispatch<React.SetStateAction<string>>;
+  onChange: (
+    selection: string,
+    userId: string | null,
+    subscriptionId: string | null,
+    subscriptionType: string | null
+  ) => void;
 }
 
 const EnvironmentTab: React.FC<EnvironmentTabProps> = ({
@@ -28,6 +33,7 @@ const EnvironmentTab: React.FC<EnvironmentTabProps> = ({
   setIsEnabled,
   description,
   setDescription,
+  onChange,
 }) => {
   return (
     <Card>
@@ -43,7 +49,7 @@ const EnvironmentTab: React.FC<EnvironmentTabProps> = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <FeatureTypeSelect isEnabled={isEnabled} />
+        <FeatureTypeSelect isEnabled={isEnabled} onChange={onChange} />
         <div className="space-y-2">
           <Label>Feature Description</Label>
           <Input
@@ -53,7 +59,6 @@ const EnvironmentTab: React.FC<EnvironmentTabProps> = ({
             disabled={!isEnabled}
           />
         </div>
-        {/* <TagsInput isEnabled={isEnabled} /> */}
       </CardContent>
     </Card>
   );

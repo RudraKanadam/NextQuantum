@@ -3,30 +3,27 @@ import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EnvironmentTab from "./featureEnvironmentTab";
 import { Button } from "@/components/ui/button";
-
-enum SubscriptionType {
-  Basic = "Basic",
-  Premium = "Premium",
-  Teams = "Teams",
-  Enterprise = "Enterprise",
-}
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import FeatureTypeSelect from "./featureTypeSelect";
+import { Input } from "./input";
 
 const FeatureLogicModal = ({ feature, onClose }: any) => {
+  const [selection, setSelection] = useState("Global");
   const [isUATEnabled, setIsUATEnabled] = useState(false);
   const [isDEVEnabled, setIsDEVEnabled] = useState(false);
   const [isPRODEnabled, setIsPRODEnabled] = useState(false);
   const [description, setDescription] = useState<string>("");
-
-  useEffect(() => {
-    setDescription(feature.description || "");
-  }, [feature]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [subscriptionType, setSubscriptionType] = useState<string | null>(null);
 
   const handleConfirm = async () => {
     const environments = [
@@ -48,10 +45,12 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
               description,
               environment: env.name,
               status: env.enabled,
-              featureType: "Subscription", // Assuming featureType is set to "Subscription"
-              subscriptionType: SubscriptionType.Premium, // Example subscription type
-              subscriptionId: null,
-              userId: null,
+              featureType: selection,
+              subscriptionType:
+                selection === "Subscription" ? subscriptionType : null,
+              subscriptionId:
+                selection === "Subscription" ? subscriptionId : null,
+              userId: selection === "User" ? userId : null,
             }),
           });
         }
@@ -63,6 +62,18 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
     }
   };
 
+  const handleSelectionChange = (
+    selection: string,
+    userId: string | null,
+    subscriptionId: string | null,
+    subscriptionType: string | null
+  ) => {
+    setSelection(selection);
+    setUserId(userId);
+    setSubscriptionId(subscriptionId);
+    setSubscriptionType(subscriptionType);
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
       <div className="bg-white dark:bg-black p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -72,43 +83,133 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
             <TabsTrigger value="UAT">UAT</TabsTrigger>
             <TabsTrigger value="PROD">PROD</TabsTrigger>
           </TabsList>
-          <TabsContent value="DEV">
-            <EnvironmentTab
-              title="DEV Logic"
-              featureName={feature.name}
-              isEnabled={isDEVEnabled}
-              setIsEnabled={setIsDEVEnabled}
-              description={description}
-              setDescription={setDescription}
-            />
-          </TabsContent>
           <TabsContent value="UAT">
-            <EnvironmentTab
-              title="UAT Logic"
-              featureName={feature.name}
-              isEnabled={isUATEnabled}
-              setIsEnabled={setIsUATEnabled}
-              description={description}
-              setDescription={setDescription}
-            />
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>UAT Logic</CardTitle>
+                    <CardDescription>
+                      Configure the UAT logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={isUATEnabled}
+                    onCheckedChange={setIsUATEnabled}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Feature Type</Label>
+                  <FeatureTypeSelect
+                    isEnabled={isUATEnabled}
+                    onChange={handleSelectionChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Feature Description</Label>
+                  <Input
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter feature description"
+                    disabled={!isUATEnabled}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between mt-4">
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+                <Button onClick={handleConfirm}>Confirm</Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          <TabsContent value="DEV">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>DEV Logic</CardTitle>
+                    <CardDescription>
+                      Configure the DEV logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={isDEVEnabled}
+                    onCheckedChange={setIsDEVEnabled}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Feature Type</Label>
+                  <FeatureTypeSelect
+                    isEnabled={isDEVEnabled}
+                    onChange={handleSelectionChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Feature Description</Label>
+                  <Input
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter feature description"
+                    disabled={!isDEVEnabled}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between mt-4">
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+                <Button onClick={handleConfirm}>Confirm</Button>
+              </CardFooter>
+            </Card>
           </TabsContent>
           <TabsContent value="PROD">
-            <EnvironmentTab
-              title="PROD Logic"
-              featureName={feature.name}
-              isEnabled={isPRODEnabled}
-              setIsEnabled={setIsPRODEnabled}
-              description={description}
-              setDescription={setDescription}
-            />
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>PROD Logic</CardTitle>
+                    <CardDescription>
+                      Configure the PROD logic for the feature {feature.name}.
+                    </CardDescription>
+                  </div>
+                  <Switch
+                    checked={isPRODEnabled}
+                    onCheckedChange={setIsPRODEnabled}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Feature Type</Label>
+                  <FeatureTypeSelect
+                    isEnabled={isPRODEnabled}
+                    onChange={handleSelectionChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Feature Description</Label>
+                  <Input
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter feature description"
+                    disabled={!isPRODEnabled}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between mt-4">
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+                <Button onClick={handleConfirm}>Confirm</Button>
+              </CardFooter>
+            </Card>
           </TabsContent>
         </Tabs>
-        <CardFooter className="flex justify-between mt-4">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          <Button onClick={handleConfirm}>Confirm</Button>
-        </CardFooter>
       </div>
     </div>
   );

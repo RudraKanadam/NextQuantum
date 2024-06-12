@@ -17,6 +17,11 @@ enum SubscriptionType {
   Enterprise = "Enterprise",
 }
 
+interface User {
+  id: string;
+  name: string;
+}
+
 interface Subscription {
   id: string;
   type: SubscriptionType;
@@ -24,15 +29,25 @@ interface Subscription {
 
 interface FeatureTypeSelectProps {
   isEnabled: boolean;
+  onChange: (
+    selection: string,
+    userId: string | null,
+    subscriptionId: string | null,
+    subscriptionType: SubscriptionType | null
+  ) => void;
 }
 
-const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
+const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({
+  isEnabled,
+  onChange,
+}) => {
   const [selection, setSelection] = useState("Global");
   const [subscriptionType, setSubscriptionType] =
     useState<SubscriptionType | null>(null);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     setSubscriptionType(null);
@@ -50,9 +65,22 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
     fetchSubscriptions();
   }, []);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      setUsers(data);
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    onChange(selection, userId, subscriptionId, subscriptionType);
+  }, [selection, userId, subscriptionId, subscriptionType, onChange]);
+
   return (
     <div className="space-y-2">
-      <Label>Feature Type</Label>
       <Select
         onValueChange={setSelection}
         defaultValue={selection}
@@ -71,10 +99,9 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
         <div className="space-y-2">
           <Label>Subscription Type</Label>
           <Select
-            onValueChange={(value: SubscriptionType) => {
-              setSubscriptionType(value);
-              setSubscriptionId(""); // Clear subscription ID when a type is selected
-            }}
+            onValueChange={(value: SubscriptionType) =>
+              setSubscriptionType(value)
+            }
             defaultValue={subscriptionType || ""}
             disabled={!isEnabled}
           >
@@ -116,12 +143,22 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
       {selection === "User" && (
         <div className="space-y-2">
           <Label>User ID</Label>
-          <Input
-            value={userId || ""}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="Enter user ID"
+          <Select
+            onValueChange={(value: string) => setUserId(value)}
+            defaultValue={userId || ""}
             disabled={!isEnabled}
-          />
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select user ID" />
+            </SelectTrigger>
+            <SelectContent>
+              {users.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.name} ({user.id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>

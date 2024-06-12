@@ -291,19 +291,21 @@ export const updateFeatureAndConditionStatuses = async (
   }
 };
 
-// Delete a feature
 export const deleteFeature = async (id: string) => {
   try {
+    // Delete related conditions
+    await db.condition.deleteMany({
+      where: { featureId: id },
+    });
+
+    // Delete the feature
     await db.feature.delete({
       where: { id },
     });
+
     return true;
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error deleting feature:", error.message);
-    } else {
-      console.error("Unknown error deleting feature");
-    }
+    console.error("Error deleting feature:", error);
     return false;
   }
 };

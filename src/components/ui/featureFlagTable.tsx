@@ -49,6 +49,7 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   useEffect(() => {
     setFeatureList(features);
@@ -88,6 +89,25 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
     setIsAlertOpen(false);
   };
 
+  const handleDelete = async () => {
+    if (selectedFeature) {
+      const deleted = await fetch("/api/features", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedFeature.id }),
+      }).then((res) => res.json());
+
+      if (deleted) {
+        setFeatureList(
+          featureList.filter((feature) => feature.id !== selectedFeature.id)
+        );
+      }
+    }
+    setIsDeleteAlertOpen(false);
+  };
+
   const handleToggleClick = (feature: Feature, env: Environment) => {
     setSelectedFeature(feature);
     setSelectedEnv(env);
@@ -97,6 +117,11 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   const handleLogicClick = (feature: Feature) => {
     setSelectedFeature(feature);
     setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (feature: Feature) => {
+    setSelectedFeature(feature);
+    setIsDeleteAlertOpen(true);
   };
 
   const closeModal = () => {
@@ -239,14 +264,7 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                       Logic
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => console.log(`Edit feature ${feature.id}`)}
-                    >
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        console.log(`Delete feature ${feature.id}`)
-                      }
+                      onClick={() => handleDeleteClick(feature)}
                     >
                       Delete
                     </DropdownMenuItem>
@@ -279,6 +297,25 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleToggle}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to delete the feature ${selectedFeature?.name}? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteAlertOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
               Confirm
             </AlertDialogAction>
           </AlertDialogFooter>
