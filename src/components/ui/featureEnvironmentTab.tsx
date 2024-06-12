@@ -53,7 +53,7 @@ const EnvironmentTab: React.FC<EnvironmentTabProps> = ({
             disabled={!isEnabled}
           />
         </div>
-        <TagsInput isEnabled={isEnabled} />
+        {/* <TagsInput isEnabled={isEnabled} /> */}
       </CardContent>
     </Card>
   );
