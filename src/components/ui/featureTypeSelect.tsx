@@ -8,13 +8,18 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import SeparatorWithOr from "@/components/ui/seperatorWithOr";
+import SeparatorWithOr from "@/components/ui/separatorWithOr";
 
 enum SubscriptionType {
   Basic = "Basic",
   Premium = "Premium",
   Teams = "Teams",
   Enterprise = "Enterprise",
+}
+
+interface Subscription {
+  id: string;
+  type: SubscriptionType;
 }
 
 interface FeatureTypeSelectProps {
@@ -27,12 +32,23 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
     useState<SubscriptionType | null>(null);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
   useEffect(() => {
     setSubscriptionType(null);
     setSubscriptionId(null);
     setUserId(null);
   }, [selection]);
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      const response = await fetch("/api/subscriptions");
+      const data = await response.json();
+      setSubscriptions(data);
+    };
+
+    fetchSubscriptions();
+  }, []);
 
   return (
     <div className="space-y-2">
@@ -76,15 +92,25 @@ const FeatureTypeSelect: React.FC<FeatureTypeSelectProps> = ({ isEnabled }) => {
           </Select>
           <SeparatorWithOr />
           <Label>Subscription ID</Label>
-          <Input
-            value={subscriptionId || ""}
-            onChange={(e) => {
-              setSubscriptionId(e.target.value);
-              setSubscriptionType(null); // Clear subscription type when an ID is entered
+          <Select
+            onValueChange={(value: string) => {
+              setSubscriptionId(value);
+              setSubscriptionType(null); // Clear subscription type when an ID is selected
             }}
-            placeholder="Enter subscription ID"
+            defaultValue={subscriptionId || ""}
             disabled={!isEnabled || subscriptionType !== null} // Disable if a subscription type is selected
-          />
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select subscription ID" />
+            </SelectTrigger>
+            <SelectContent>
+              {subscriptions.map((subscription) => (
+                <SelectItem key={subscription.id} value={subscription.id}>
+                  {subscription.id} ({subscription.type})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
       {selection === "User" && (
