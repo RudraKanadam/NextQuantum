@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,13 @@ type Environment = "UAT" | "Dev" | "Prod";
 interface Feature {
   id: string;
   name: string;
-  environments: { UAT: boolean; Dev: boolean; Prod: boolean };
+  description?: string;
+  environment: Environment;
+  status: boolean;
+  featureType: string;
+  subscriptionType?: string;
+  subscriptionId?: string | null;
+  userId?: string | null;
 }
 
 interface FeatureFlagTableProps {
@@ -36,10 +42,17 @@ interface FeatureFlagTableProps {
 const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   const router = useRouter();
   const [featureList, setFeatureList] = useState(features);
-  const [selectedFeature, setSelectedFeature] = useState<any>(null);
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+
+  useEffect(() => {
+    const initializedFeatures = features.map((feature) => ({
+      ...feature,
+    }));
+    setFeatureList(initializedFeatures);
+  }, [features]);
 
   const handleToggle = () => {
     if (selectedFeature && selectedEnv) {
@@ -48,10 +61,7 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
           feature.id === selectedFeature.id
             ? {
                 ...feature,
-                environments: {
-                  ...feature.environments,
-                  [selectedEnv]: !feature.environments[selectedEnv],
-                },
+                status: !feature.status,
               }
             : feature
         )
@@ -60,13 +70,13 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
     setIsAlertOpen(false);
   };
 
-  const handleToggleClick = (feature: any, env: Environment) => {
+  const handleToggleClick = (feature: Feature, env: Environment) => {
     setSelectedFeature(feature);
     setSelectedEnv(env);
     setIsAlertOpen(true);
   };
 
-  const handleLogicClick = (feature: any) => {
+  const handleLogicClick = (feature: Feature) => {
     setSelectedFeature(feature);
     setIsModalOpen(true);
   };
@@ -104,15 +114,17 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
-                      feature.environments.UAT
+                      feature.environment === "UAT" && feature.status
                         ? "text-green-500"
                         : "text-red-500"
                     }`}
                   >
-                    {feature.environments.UAT ? "On" : "Off"}
+                    {feature.environment === "UAT" && feature.status
+                      ? "On"
+                      : "Off"}
                   </p>
                   <Switch
-                    checked={feature.environments.UAT}
+                    checked={feature.environment === "UAT" && feature.status}
                     onCheckedChange={() => handleToggleClick(feature, "UAT")}
                   />
                 </div>
@@ -121,15 +133,17 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
-                      feature.environments.Dev
+                      feature.environment === "Dev" && feature.status
                         ? "text-green-500"
                         : "text-red-500"
                     }`}
                   >
-                    {feature.environments.Dev ? "On" : "Off"}
+                    {feature.environment === "Dev" && feature.status
+                      ? "On"
+                      : "Off"}
                   </p>
                   <Switch
-                    checked={feature.environments.Dev}
+                    checked={feature.environment === "Dev" && feature.status}
                     onCheckedChange={() => handleToggleClick(feature, "Dev")}
                   />
                 </div>
@@ -138,15 +152,17 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
-                      feature.environments.Prod
+                      feature.environment === "Prod" && feature.status
                         ? "text-green-500"
                         : "text-red-500"
                     }`}
                   >
-                    {feature.environments.Prod ? "On" : "Off"}
+                    {feature.environment === "Prod" && feature.status
+                      ? "On"
+                      : "Off"}
                   </p>
                   <Switch
-                    checked={feature.environments.Prod}
+                    checked={feature.environment === "Prod" && feature.status}
                     onCheckedChange={() => handleToggleClick(feature, "Prod")}
                   />
                 </div>
@@ -192,12 +208,10 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
             <AlertDialogTitle>Confirm Toggle</AlertDialogTitle>
             <AlertDialogDescription>
               {`Are you sure you want to ${
-                selectedFeature?.environments[selectedEnv!]
-                  ? "turn off"
-                  : "turn on"
-              } the feature ${
-                selectedFeature?.name
-              } for ${selectedEnv} environment?`}
+                selectedFeature?.status ? "turn off" : "turn on"
+              } the feature ${selectedFeature?.name} for ${
+                selectedEnv ? selectedEnv : "this"
+              } environment?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

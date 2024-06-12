@@ -25,6 +25,12 @@ enum Environment {
   Prod
 }
 
+enum FeatureType {
+  Global
+  Subscription
+  User
+}
+
 model User {
   id            String         @id @default(cuid())
   name          String?
@@ -78,7 +84,8 @@ model Feature {
   name             String
   description      String?
   environment      Environment
-  status           Boolean         @default(false)  // Column to track feature status
+  status           Boolean         @default(false)
+  featureType      FeatureType
   subscriptionType SubscriptionType?
   subscriptionId   String?
   userId           String?
@@ -86,6 +93,5 @@ model Feature {
   subscription     Subscription?   @relation("SubscriptionFeatures", fields: [subscriptionId], references: [id])
   user             User?           @relation("UserFeatures", fields: [userId], references: [id])
 
-  @@unique([name, environment])
   @@map("features")
 }

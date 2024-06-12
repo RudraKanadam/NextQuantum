@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
-import { SubscriptionType, Environment } from "@prisma/client";
+import { SubscriptionType, Environment, FeatureType } from "@prisma/client";
+
+// Feature Management Functions
+
 export const getFeatureById = async (id: string) => {
   try {
     const feature = await db.feature.findUnique({
@@ -27,27 +30,63 @@ export const getAllFeatures = async () => {
 
 export const createFeature = async (
   name: string,
+  description: string,
   environment: Environment,
   status: boolean,
+  featureType: FeatureType,
   subscriptionType?: SubscriptionType,
   subscriptionId?: string,
   userId?: string
 ) => {
   try {
+    // Check if the user exists if userId is provided
+    if (featureType === "User" && userId) {
+      const user = await db.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+    }
+
+    // Check if the subscription exists if subscriptionId is provided
+    if (featureType === "Subscription" && subscriptionId) {
+      const subscription = await db.subscription.findUnique({
+        where: { id: subscriptionId },
+      });
+      if (!subscription) {
+        throw new Error("Subscription not found");
+      }
+    }
+
+    // Validate that either subscriptionType or subscriptionId is provided
+    if (
+      featureType === "Subscription" &&
+      !subscriptionType &&
+      !subscriptionId
+    ) {
+      throw new Error(
+        "Either subscriptionType or subscriptionId must be provided for Subscription features"
+      );
+    }
+
     const newFeature = await db.feature.create({
       data: {
         name,
+        description,
         environment,
         status,
-        subscriptionType,
-        subscriptionId,
-        userId,
+        featureType,
+        subscriptionType:
+          featureType === "Subscription" ? subscriptionType : null,
+        subscriptionId: featureType === "Subscription" ? subscriptionId : null,
+        userId: featureType === "User" ? userId : null,
       },
       include: { subscription: true, user: true },
     });
     return newFeature;
   } catch (error) {
-    console.error("Error creating feature:", error);
+    console.error("Error creating feature:", error.message);
     return null;
   }
 };
@@ -55,8 +94,10 @@ export const createFeature = async (
 export const updateFeature = async (
   id: string,
   name?: string,
+  description?: string,
   environment?: Environment,
   status?: boolean,
+  featureType?: FeatureType,
   subscriptionType?: SubscriptionType,
   subscriptionId?: string,
   userId?: string
@@ -66,11 +107,14 @@ export const updateFeature = async (
       where: { id },
       data: {
         name,
+        description,
         environment,
         status,
-        subscriptionType,
-        subscriptionId,
-        userId,
+        featureType,
+        subscriptionType:
+          featureType === "Subscription" ? subscriptionType : null,
+        subscriptionId: featureType === "Subscription" ? subscriptionId : null,
+        userId: featureType === "User" ? userId : null,
       },
       include: { subscription: true, user: true },
     });

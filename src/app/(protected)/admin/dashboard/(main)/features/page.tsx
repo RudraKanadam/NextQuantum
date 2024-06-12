@@ -25,9 +25,23 @@ const FeaturePage = () => {
   useEffect(() => {
     const fetchFeatures = async () => {
       try {
-        const response = await fetch("/api/features");
+        const response = await fetch("/api/features", {
+          method: "GET",
+        });
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
         const data = await response.json();
-        setFeatures(data);
+        // Ensure environments object is initialized
+        const initializedFeatures = data.map((feature: any) => ({
+          ...feature,
+          environments: feature.environments || {
+            UAT: false,
+            Dev: false,
+            Prod: false,
+          },
+        }));
+        setFeatures(initializedFeatures);
       } catch (error) {
         console.error("Error fetching features:", error);
       }

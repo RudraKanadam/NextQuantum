@@ -1,31 +1,17 @@
 import { NextResponse } from "next/server";
 import {
-  getAllFeatures,
   getFeatureById,
+  getAllFeatures,
   createFeature,
   updateFeature,
   deleteFeature,
-} from "@/data/feature"; // Ensure this import path is correct
+} from "@/data/feature";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
+// GET all features
+export async function GET() {
   try {
-    if (id) {
-      const feature = await getFeatureById(id);
-      if (feature) {
-        return NextResponse.json(feature, { status: 200 });
-      } else {
-        return NextResponse.json(
-          { error: "Feature not found" },
-          { status: 404 }
-        );
-      }
-    } else {
-      const features = await getAllFeatures();
-      return NextResponse.json(features, { status: 200 });
-    }
+    const features = await getAllFeatures();
+    return NextResponse.json(features, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { error: "Error fetching features" },
@@ -34,24 +20,31 @@ export async function GET(req: Request) {
   }
 }
 
+// POST create a new feature
 export async function POST(req: Request) {
   try {
     const {
       name,
+      description,
       environment,
       status,
+      featureType,
       subscriptionType,
       subscriptionId,
       userId,
     } = await req.json();
+
     const newFeature = await createFeature(
       name,
+      description,
       environment,
       status,
+      featureType,
       subscriptionType,
       subscriptionId,
       userId
     );
+
     if (newFeature) {
       return NextResponse.json(newFeature, { status: 201 });
     } else {
@@ -68,22 +61,28 @@ export async function POST(req: Request) {
   }
 }
 
+// PUT update a feature
 export async function PUT(req: Request) {
   try {
     const {
       id,
       name,
+      description,
       environment,
       status,
+      featureType,
       subscriptionType,
       subscriptionId,
       userId,
     } = await req.json();
+
     const updatedFeature = await updateFeature(
       id,
       name,
+      description,
       environment,
       status,
+      featureType,
       subscriptionType,
       subscriptionId,
       userId
@@ -105,6 +104,7 @@ export async function PUT(req: Request) {
   }
 }
 
+// DELETE a feature
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
