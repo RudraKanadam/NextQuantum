@@ -26,6 +26,7 @@ type Environment = "UAT" | "Dev" | "Prod";
 interface Condition {
   id: string;
   environment: Environment;
+  featureType: string;
   status: boolean;
 }
 
@@ -33,7 +34,7 @@ interface Feature {
   id: string;
   name: string;
   description?: string;
-  status: boolean;
+  status: boolean; // Global status
   conditions: Condition[];
 }
 
@@ -45,9 +46,7 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   const router = useRouter();
   const [featureList, setFeatureList] = useState(features);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const [selectedCondition, setSelectedCondition] = useState<Condition | null>(
-    null
-  );
+  const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
@@ -56,28 +55,32 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
   }, [features]);
 
   const handleToggle = async () => {
-    if (selectedFeature && selectedCondition) {
-      const updatedFeature = await fetch("/api/features/updateStatus", {
+    if (selectedFeature) {
+      const updatedFeature = await fetch("/api/features/updateStatuses", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           featureId: selectedFeature.id,
-          featureStatus: selectedFeature.status,
-          conditionStatuses: [
-            {
-              conditionId: selectedCondition.id,
-              status: !selectedCondition.status,
-            },
-          ],
+          featureStatus: !selectedFeature.status,
+          conditionStatuses: selectedFeature.conditions.map((condition) => ({
+            conditionId: condition.id,
+            status: !selectedFeature.status,
+          })),
         }),
       }).then((res) => res.json());
 
       if (updatedFeature) {
-        setFeatureList((prev) =>
-          prev.map((feature) =>
-            feature.id === updatedFeature.id ? updatedFeature : feature
+        setFeatureList(
+          featureList.map((feature) =>
+            feature.id === selectedFeature.id
+              ? {
+                  ...feature,
+                  status: updatedFeature.status,
+                  conditions: updatedFeature.conditions,
+                }
+              : feature
           )
         );
       }
@@ -85,9 +88,9 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
     setIsAlertOpen(false);
   };
 
-  const handleToggleClick = (feature: Feature, condition: Condition) => {
+  const handleToggleClick = (feature: Feature, env: Environment) => {
     setSelectedFeature(feature);
-    setSelectedCondition(condition);
+    setSelectedEnv(env);
     setIsAlertOpen(true);
   };
 
@@ -125,36 +128,105 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
               onClick={() => handleRowClick(feature.id)}
             >
               <td className="py-3 px-6">{feature.name}</td>
-              {["Dev", "UAT", "Prod"].map((env) => {
-                const condition = feature.conditions.find(
-                  (cond) => cond.environment === env
-                );
-                return (
-                  <td
-                    key={env}
-                    className="py-3 px-6"
-                    onClick={(e) => e.stopPropagation()}
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center space-x-2">
+                  <p
+                    className={`text-sm ${
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "Dev" && condition.status
+                      )
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
                   >
-                    <div className="flex items-center space-x-2">
-                      <p
-                        className={`text-sm ${
-                          condition && condition.status
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }`}
-                      >
-                        {condition && condition.status ? "On" : "Off"}
-                      </p>
-                      <Switch
-                        checked={condition && condition.status}
-                        onCheckedChange={() =>
-                          handleToggleClick(feature, condition!)
-                        }
-                      />
-                    </div>
-                  </td>
-                );
-              })}
+                    {feature.status &&
+                    feature.conditions.some(
+                      (condition) =>
+                        condition.environment === "Dev" && condition.status
+                    )
+                      ? "On"
+                      : "Off"}
+                  </p>
+                  <Switch
+                    checked={
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "Dev" && condition.status
+                      )
+                    }
+                    onCheckedChange={() => handleToggleClick(feature, "Dev")}
+                  />
+                </div>
+              </td>
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center space-x-2">
+                  <p
+                    className={`text-sm ${
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "UAT" && condition.status
+                      )
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.status &&
+                    feature.conditions.some(
+                      (condition) =>
+                        condition.environment === "UAT" && condition.status
+                    )
+                      ? "On"
+                      : "Off"}
+                  </p>
+                  <Switch
+                    checked={
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "UAT" && condition.status
+                      )
+                    }
+                    onCheckedChange={() => handleToggleClick(feature, "UAT")}
+                  />
+                </div>
+              </td>
+              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center space-x-2">
+                  <p
+                    className={`text-sm ${
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "Prod" && condition.status
+                      )
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {feature.status &&
+                    feature.conditions.some(
+                      (condition) =>
+                        condition.environment === "Prod" && condition.status
+                    )
+                      ? "On"
+                      : "Off"}
+                  </p>
+                  <Switch
+                    checked={
+                      feature.status &&
+                      feature.conditions.some(
+                        (condition) =>
+                          condition.environment === "Prod" && condition.status
+                      )
+                    }
+                    onCheckedChange={() => handleToggleClick(feature, "Prod")}
+                  />
+                </div>
+              </td>
               <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -196,9 +268,9 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
             <AlertDialogTitle>Confirm Toggle</AlertDialogTitle>
             <AlertDialogDescription>
               {`Are you sure you want to ${
-                selectedCondition?.status ? "turn off" : "turn on"
+                selectedFeature?.status ? "turn off" : "turn on"
               } the feature ${selectedFeature?.name} for ${
-                selectedCondition?.environment
+                selectedEnv ? selectedEnv : "this"
               } environment?`}
             </AlertDialogDescription>
           </AlertDialogHeader>

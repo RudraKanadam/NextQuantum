@@ -34,7 +34,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
   const [selection, setSelection] = useState("Global");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [operator, setOperator] = useState("==");
   const [isUATEnabled, setIsUATEnabled] = useState(false);
   const [isDEVEnabled, setIsDEVEnabled] = useState(false);
   const [isPRODEnabled, setIsPRODEnabled] = useState(false);
@@ -53,10 +52,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
 
   const handleSelectionChange = (value: string) => {
     setSelection(value);
-  };
-
-  const handleOperatorChange = (value: string) => {
-    setOperator(value);
   };
 
   const handleTagInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,10 +109,10 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
       <div className="bg-white dark:bg-black p-6 rounded-lg shadow-lg w-full max-w-md">
-        <Tabs defaultValue="UAT">
+        <Tabs defaultValue="DEV">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="UAT">UAT</TabsTrigger>
             <TabsTrigger value="DEV">DEV</TabsTrigger>
+            <TabsTrigger value="UAT">UAT</TabsTrigger>
             <TabsTrigger value="PROD">PROD</TabsTrigger>
           </TabsList>
           <TabsContent value="UAT">
@@ -212,24 +207,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isUATEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
                     <Input
@@ -258,7 +235,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     ))}
                   </div>
                 </div>
-                <p>Logic settings for UAT environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>
@@ -360,24 +336,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isDEVEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
                     <Input
@@ -406,7 +364,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     ))}
                   </div>
                 </div>
-                <p>Logic settings for DEV environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>
@@ -508,24 +465,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isPRODEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Tags</Label>
                   <div className="flex items-center space-x-2">
                     <Input
@@ -554,7 +493,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     ))}
                   </div>
                 </div>
-                <p>Logic settings for PROD environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Environment, FeatureType, Operator } from "@prisma/client";
+import { Environment, FeatureType, SubscriptionType } from "@prisma/client";
 
 // Feature Management Functions
 
@@ -11,16 +11,28 @@ export const createFeature = async (
   conditions: {
     environment: Environment;
     featureType: FeatureType;
-    operator: Operator;
-    value: string;
     conditionStatus: boolean;
     userId?: string;
     subscriptionId?: string;
+    subscriptionType?: SubscriptionType;
   }[]
 ) => {
   try {
-    // Validate provided userId and subscriptionId
+    // Check for conditions for non-global features
+    if (!conditions || conditions.length === 0) {
+      throw new Error("Conditions are required for non-global features.");
+    }
+
+    // Validate conditions
     for (const condition of conditions) {
+      if (condition.featureType === FeatureType.Subscription) {
+        if (!condition.subscriptionType && !condition.subscriptionId) {
+          throw new Error(
+            "Either subscriptionType or subscriptionId is required for Subscription feature type."
+          );
+        }
+      }
+
       if (condition.userId) {
         const user = await db.user.findUnique({
           where: { id: condition.userId },
@@ -29,6 +41,7 @@ export const createFeature = async (
           throw new Error(`User with id ${condition.userId} not found`);
         }
       }
+
       if (condition.subscriptionId) {
         const subscription = await db.subscription.findUnique({
           where: { id: condition.subscriptionId },
@@ -45,25 +58,26 @@ export const createFeature = async (
       data: {
         name,
         description,
-        status,
+        status: false, // Initial global status set to false
         conditions: {
           create: conditions.map((condition) => ({
             environment: condition.environment,
             featureType: condition.featureType,
-            operator: condition.operator,
-            value: condition.value,
             status: condition.conditionStatus,
             userCondition: condition.userId
               ? { create: { userId: condition.userId } }
               : undefined,
             subscriptionCondition: condition.subscriptionId
               ? { create: { subscriptionId: condition.subscriptionId } }
+              : condition.subscriptionType
+              ? { create: { subscriptionType: condition.subscriptionType } }
               : undefined,
           })),
         },
       },
       include: { conditions: true },
     });
+
     return newFeature;
   } catch (error) {
     if (error instanceof Error) {
@@ -119,11 +133,10 @@ export const updateFeature = async (
   conditions?: {
     environment: Environment;
     featureType: FeatureType;
-    operator: Operator;
-    value: string;
     conditionStatus: boolean;
     userId?: string;
     subscriptionId?: string;
+    subscriptionType?: SubscriptionType;
   }[]
 ) => {
   try {
@@ -163,14 +176,14 @@ export const updateFeature = async (
               create: conditions.map((condition) => ({
                 environment: condition.environment,
                 featureType: condition.featureType,
-                operator: condition.operator,
-                value: condition.value,
                 status: condition.conditionStatus,
                 userCondition: condition.userId
                   ? { create: { userId: condition.userId } }
                   : undefined,
                 subscriptionCondition: condition.subscriptionId
                   ? { create: { subscriptionId: condition.subscriptionId } }
+                  : condition.subscriptionType
+                  ? { create: { subscriptionType: condition.subscriptionType } }
                   : undefined,
               })),
             }
@@ -184,6 +197,41 @@ export const updateFeature = async (
       console.error("Error updating feature:", error.message);
     } else {
       console.error("Unknown error updating feature");
+    }
+    return null;
+  }
+};
+
+// Update feature status and condition statuses
+export const updateFeatureStatus = async (id: string, status: boolean) => {
+  try {
+    const updatedFeature = await db.feature.update({
+      where: { id },
+      data: { status },
+      include: { conditions: true },
+    });
+
+    if (status) {
+      // If the feature is enabled globally, enable all conditions
+      await db.condition.updateMany({
+        where: { featureId: id },
+        data: { status: true },
+      });
+
+      // Refresh the feature to get updated conditions
+      const finalUpdatedFeature = await db.feature.findUnique({
+        where: { id },
+        include: { conditions: true },
+      });
+      return finalUpdatedFeature;
+    } else {
+      return updatedFeature;
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error updating feature status:", error.message);
+    } else {
+      console.error("Unknown error updating feature status");
     }
     return null;
   }
@@ -216,6 +264,18 @@ export const updateFeatureAndConditionStatuses = async (
       where: { id: featureId },
       include: { conditions: true },
     });
+
+    // If feature is enabled globally, enable all conditions
+    if (finalUpdatedFeature && featureStatus) {
+      await db.condition.updateMany({
+        where: { featureId },
+        data: { status: true },
+      });
+
+      finalUpdatedFeature.conditions = finalUpdatedFeature.conditions.map(
+        (condition) => ({ ...condition, status: true })
+      );
+    }
 
     return finalUpdatedFeature;
   } catch (error) {

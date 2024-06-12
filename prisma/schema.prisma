@@ -31,13 +31,6 @@ enum FeatureType {
   User
 }
 
-enum Operator {
-  EQUALS
-  NOT_EQUALS
-  GREATER_THAN
-  LESS_THAN
-}
-
 model User {
   id            String         @id @default(cuid())
   name          String?
@@ -50,7 +43,7 @@ model User {
   subscription  Subscription?  @relation(fields: [subscriptionId], references: [id])
   subscriptionId String?       @unique
   userConditions UserCondition[]
-  
+
   @@map("users")
 }
 
@@ -91,7 +84,7 @@ model Feature {
   description String?
   status      Boolean        @default(false)  // Global activation state of the feature
   conditions  Condition[]
-  
+
   @@map("features")
 }
 
@@ -100,8 +93,6 @@ model Condition {
   featureId              String
   environment            Environment
   featureType            FeatureType
-  operator               Operator
-  value                  String
   status                 Boolean               @default(false)  // Condition-specific activation state
   feature                Feature               @relation(fields: [featureId], references: [id])
 
@@ -122,11 +113,12 @@ model UserCondition {
 }
 
 model SubscriptionCondition {
-  id          String     @id @default(cuid())
-  subscriptionId String
-  conditionId String     @unique
-  subscription Subscription @relation(fields: [subscriptionId], references: [id])
-  condition   Condition  @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+  id               String           @id @default(cuid())
+  subscriptionId   String?
+  subscriptionType SubscriptionType?
+  conditionId      String           @unique
+  subscription     Subscription?    @relation(fields: [subscriptionId], references: [id])
+  condition        Condition        @relation(fields: [conditionId], references: [id], onDelete: Cascade)
 
   @@map("subscriptionFeatureConditions")
 }
