@@ -40,16 +40,6 @@ export async function PUT(req: Request) {
   try {
     const { id, name, email, password, role, subscriptionType } =
       await req.json();
-
-    console.log("Received data for update:", {
-      id,
-      name,
-      email,
-      password,
-      role,
-      subscriptionType,
-    });
-
     const updatedUser = await updateUser(
       id,
       name,

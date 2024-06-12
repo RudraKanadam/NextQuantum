@@ -33,7 +33,6 @@ export const getAllUsers = async () => {
     const users = await db.user.findMany({
       include: { subscription: true },
     });
-    console.log(users);
     return users;
   } catch (error) {
     console.error("Error fetching all users:", error);
@@ -83,9 +82,6 @@ export const updateUser = async (
 ) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    console.log("Updating user:", { id, name, email, role, subscriptionType });
-
     // Update user details
     const updatedUser = await db.user.update({
       where: { id },
@@ -100,14 +96,8 @@ export const updateUser = async (
       },
     });
 
-    console.log("User updated:", updatedUser);
-
     // Update or create the subscription
     if (updatedUser.subscriptionId) {
-      console.log(
-        "Updating existing subscription:",
-        updatedUser.subscriptionId
-      );
       await db.subscription.update({
         where: { id: updatedUser.subscriptionId },
         data: {
@@ -115,7 +105,6 @@ export const updateUser = async (
         },
       });
     } else {
-      console.log("Creating new subscription for user:", updatedUser.id);
       const newSubscription = await db.subscription.create({
         data: {
           type: subscriptionType,
@@ -140,7 +129,6 @@ export const updateUser = async (
       include: { subscription: true },
     });
 
-    console.log("Final updated user:", finalUser);
     return finalUser;
   } catch (error) {
     console.error("Error updating user:", error);

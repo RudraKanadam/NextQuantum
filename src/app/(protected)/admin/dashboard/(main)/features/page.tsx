@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,13 +20,43 @@ const FeaturePage = () => {
   const [newFeatureName, setNewFeatureName] = useState("");
   const [isLogicModalOpen, setIsLogicModalOpen] = useState(false);
   const [createdFeature, setCreatedFeature] = useState<any>(null);
+  const [features, setFeatures] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const response = await fetch("/api/features", {
+          method: "GET",
+        });
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        // Ensure environments object is initialized
+        const initializedFeatures = data.map((feature: any) => ({
+          ...feature,
+          environments: feature.environments || {
+            UAT: false,
+            Dev: false,
+            Prod: false,
+          },
+        }));
+        setFeatures(initializedFeatures);
+      } catch (error) {
+        console.error("Error fetching features:", error);
+      }
+    };
+
+    fetchFeatures();
+  }, []);
 
   const handleCreateFeature = () => {
-    setCreatedFeature({
+    const newFeature = {
       id: Date.now().toString(),
       name: newFeatureName,
       environments: { UAT: false, Dev: false, Prod: false },
-    });
+    };
+    setCreatedFeature(newFeature);
     setIsDialogOpen(false);
     setIsLogicModalOpen(true);
   };
@@ -73,7 +103,7 @@ const FeaturePage = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <FeatureFlagTable />
+      <FeatureFlagTable features={features} />
       {isLogicModalOpen && createdFeature && (
         <FeatureLogicModal feature={createdFeature} onClose={closeLogicModal} />
       )}
