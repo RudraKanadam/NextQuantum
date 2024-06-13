@@ -1,9 +1,11 @@
 import React from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
+import { FlipWords } from "@/components/ui/flip-words";
 import { LampEffect } from "@/components/lampEffect";
 import GlobalNavBar from "@/components/global/navbar";
 
 export default function Home() {
+  const words = ["Effect", "Modern", "Faster", "Better"];
   return (
     <main className="flex items-center justify-center flex-col">
       <GlobalNavBar />
@@ -19,9 +21,13 @@ export default function Home() {
             particleColor="#FFFFFF"
           />
         </div>
-        <h1 className="md:text-7xl text-3xl lg:text-6xl font-bold text-center text-white relative z-20">
-          Boilerplate - NextQuantum
-        </h1>
+        <div className="text-6xl mx-auto font-normal text-neutral-600 dark:text-neutral-400">
+          Develop
+          <FlipWords words={words} /> <br />
+          <div className="text-4xl mx-auto font-normal text-neutral-600 dark:text-neutral-400">
+            websites with NextQuantum
+          </div>
+        </div>
       </div>
       <LampEffect />
     </main>
