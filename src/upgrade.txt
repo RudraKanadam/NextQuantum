@@ -6,3 +6,15 @@
 6. reverse arrow marks for apps to FMS
 7. API - APP calling FMS flag and storing in browser - Show in DEMO
 8. Default Flag
+
+
+
+
+---------------------------------------
+Give basic details about SAVVAS arch - What they did from here
+// TODO : IMPORTANT 
+Steps to migrate to progressive delibery
+Step ons Converting from Monolith to microservices
+How to handle failures
+Testing approach - Initialy phase to last phase - Manully + automation test cases
+How its effected QA testing 

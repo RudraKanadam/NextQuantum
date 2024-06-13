@@ -7,13 +7,15 @@ import {
   DEFAULT_ADMIN_LOGIN_REDIRECT,
 } from "@/routes";
 import { AuthError } from "next-auth";
-import { getUserByEmail } from "@/data/user"; // Ensure this path is correct
+import { getUserByEmail } from "@/data/user";
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
   try {
+    console.log("Login values:", values);
     const validatedFields = loginSchema.safeParse(values);
 
     if (!validatedFields.success) {
+      console.log("Validation failed:", validatedFields.error);
       return { error: "Invalid Fields" };
     }
 
@@ -24,17 +26,17 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
       redirect: false,
     });
 
+    console.log("SignIn result:", result);
+
     if (result?.error) {
       return { error: result.error };
     }
 
-    // Fetch the user information to get the role
     const user = await getUserByEmail(email);
     if (!user) {
       return { error: "User not found!" };
     }
 
-    // Determine the redirect URL based on the user's role
     const redirectUrl =
       user.role === "admin"
         ? DEFAULT_ADMIN_LOGIN_REDIRECT
@@ -42,6 +44,7 @@ export const login = async (values: z.infer<typeof loginSchema>) => {
 
     return { success: "Login Success", redirect: redirectUrl };
   } catch (error) {
+    console.error("Login error:", error);
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":

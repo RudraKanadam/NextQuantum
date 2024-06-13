@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { loginSchema } from "./validatorSchema";
 import { getUserByEmail, getUserById } from "./data/user";
+import { UserRole, SubscriptionType } from "@prisma/client"; // Ensure these imports
 
 const options = {
   adapter: PrismaAdapter(db),
@@ -23,7 +24,24 @@ const options = {
           if (!user || !user.password) return null;
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+            // Fetch subscription details
+            const subscription = user.subscriptionId
+              ? await db.subscription.findUnique({
+                  where: { id: user.subscriptionId },
+                })
+              : null;
+
+            // Return user with subscription details
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role as UserRole,
+              subscriptionId: subscription ? subscription.id : null,
+              subscriptionType: subscription ? subscription.type : null,
+            };
+          }
         }
         return null;
       },
@@ -42,16 +60,35 @@ const options = {
         session.user.role = token.role;
       }
 
+      if (token.subscriptionId !== undefined && session.user) {
+        session.user.subscriptionId = token.subscriptionId;
+      }
+
+      if (token.subscriptionType !== undefined && session.user) {
+        session.user.subscriptionType = token.subscriptionType;
+      }
+
       return session;
     },
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.sub = user.id;
-      }
-      if (token.sub) {
+        token.role = user.role;
+        token.subscriptionId = user.subscriptionId;
+        token.subscriptionType = user.subscriptionType;
+      } else if (token.sub) {
         const existingUser = await getUserById(token.sub);
         if (existingUser) {
           token.role = existingUser.role;
+          if (existingUser.subscriptionId) {
+            const subscription = await db.subscription.findUnique({
+              where: { id: existingUser.subscriptionId },
+            });
+            if (subscription) {
+              token.subscriptionId = subscription.id;
+              token.subscriptionType = subscription.type;
+            }
+          }
         }
       }
       return token;
