@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import React from "react";
 import { Notifications } from "@/components/dashboard/home/notifications";
 import NextJsCard from "./_components/NextJsCard";
@@ -7,11 +6,11 @@ import ShadCnCard from "./_components/ShadCnCard";
 import AcernityCard from "./_components/AcernityCard";
 import BoilerplateAccordion from "./_components/BoilerplateAccordion";
 import { MeteorsCard } from "./_components/Meteors";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { checkFeatureFlag } from "@/utils/feature-flag"; // Import the helper function
 
 const DashboardPage = async () => {
-  const session = await auth();
+  const { session, featureCardsEnabled } = await checkFeatureFlag();
+
   return (
     <div className="flex flex-col gap-4 relative p-4 md:p-6 lg:p-8">
       <h1 className="text-4xl sticky top-0 z-[10] bg-background/50 backdrop-blur-lg flex items-center border-b p-4 md:p-6 lg:p-8">
@@ -20,13 +19,15 @@ const DashboardPage = async () => {
       <h1 className="text-3xl font-bold mb-6">
         Welcome, {session?.user?.name}!
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Feature Cards */}
-        <NextJsCard />
-        <AuthJsCard />
-        <ShadCnCard />
-        <AcernityCard />
-      </div>
+      {featureCardsEnabled && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Feature Cards */}
+          <NextJsCard />
+          <AuthJsCard />
+          <ShadCnCard />
+          <AcernityCard />
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6 mt-6 mx-6">
         {/* Accordion for Boilerplate FAQ */}

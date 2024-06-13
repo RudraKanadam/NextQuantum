@@ -19,7 +19,6 @@ export default async function middleware(req: NextRequest) {
   }
 
   const token = await getToken({
-    // TODO Temporary cast to any to bypass type mismatch
     req: req as any,
     secret,
   } as GetTokenParams);
@@ -55,7 +54,6 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", origin));
   }
 
-  // Role-based access control
   if (isLoggedIn && token.role) {
     if (token.role === "admin") {
       if (!isAdminRoute && pathname !== DEFAULT_ADMIN_LOGIN_REDIRECT) {

@@ -111,7 +111,14 @@ export const getFeatureById = async (id: string) => {
 export const getAllFeatures = async () => {
   try {
     const features = await db.feature.findMany({
-      include: { conditions: true },
+      include: {
+        conditions: {
+          include: {
+            userCondition: true,
+            subscriptionCondition: true,
+          },
+        },
+      },
     });
     return features;
   } catch (error) {

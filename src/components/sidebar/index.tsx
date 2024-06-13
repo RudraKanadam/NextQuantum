@@ -19,13 +19,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useFeatureFlags } from "@/providers/featureFlag-provider"; // Import the hook
 
 type Props = {};
 
 const MenuOptions: React.FC<Props> = () => {
+  const { isFeatureEnabled } = useFeatureFlags(); // Use the hook
+  const environment = "Dev";
   const { data: session } = useSession();
   const pathName = usePathname();
   const role = session?.user?.role || "guest";
+  const userId = session?.user?.id || ""; // Provide default empty string
+  const subscriptionId = session?.user?.subscriptionId || ""; // Provide default empty string
+  const subscriptionType = session?.user?.subscriptionType || ""; // Provide default empty string
 
   const getMenuOptions = (role: string) => {
     switch (role) {
@@ -88,23 +94,28 @@ const MenuOptions: React.FC<Props> = () => {
           ))}
         </TooltipProvider>
         <Separator />
-        <div className="flex items-center flex-col gap-9 dark:bg-[#353346]/30 py-4 px-2 rounded-full h-56 overflow-scroll border-[1px]">
-          <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
-            <LucideMousePointerClick className="dark:text-white" size={18} />
-            <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]" />
+        {isFeatureEnabled(
+          "dashboard.sidebar.iconGroup",
+          environment,
+          userId || undefined,
+          subscriptionId || undefined,
+          subscriptionType || undefined
+        ) && (
+          <div className="flex items-center flex-col gap-9 dark:bg-[#353346]/30 py-4 px-2 rounded-full h-56 overflow-scroll border-[1px]">
+            <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
+              <LucideMousePointerClick className="dark:text-white" size={18} />
+              <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]" />
+            </div>
+            <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
+              <GitBranch className="text-muted-foreground" size={18} />
+              <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]"></div>
+            </div>
+            <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
+              <Database className="text-muted-foreground" size={18} />
+              <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]"></div>
+            </div>
           </div>
-          <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
-            <GitBranch className="text-muted-foreground" size={18} />
-            <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]"></div>
-          </div>
-          <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
-            <Database className="text-muted-foreground" size={18} />
-            <div className="border-l-2 border-muted-foreground/50 h-6 absolute left-1/2 transform translate-x-[-50%] -bottom-[30px]"></div>
-          </div>
-          <div className="relative dark:bg-[#353346]/70 p-2 rounded-full dark:border-t-[2px] border-[1px] dark:border-t-[#353346]">
-            <GitBranch className="text-muted-foreground" size={18} />
-          </div>
-        </div>
+        )}
       </div>
       <div className="flex items-center justify-center flex-col gap-8">
         <ModeToggle />

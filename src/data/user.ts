@@ -135,6 +135,7 @@ export const updateUser = async (
     return null;
   }
 };
+
 export const deleteUser = async (id: string) => {
   try {
     await db.user.delete({
