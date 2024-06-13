@@ -48,13 +48,13 @@ const DashboardPage = async () => {
           </div>
         </section>
 
-        <section className="flex justify-end items-center flex-grow mt-16">
+        {/* <section className="flex justify-end items-center flex-grow mt-16">
           <div className="flex justify-end items-center w-full lg:w-2/3">
             <Notifications />
           </div>
         </section>
 
-        {/* Quick Links */}
+        {/* Quick Links 
         <section className="flex-1 bg-white dark:bg-gray-900 p-4 rounded-lg shadow-md mt-6">
           <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
           <div className="flex gap-4">
@@ -66,6 +66,7 @@ const DashboardPage = async () => {
             </a>
           </div>
         </section>
+         */}
       </main>
     </div>
   );
