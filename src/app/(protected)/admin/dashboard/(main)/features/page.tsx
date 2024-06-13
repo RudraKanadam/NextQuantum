@@ -32,16 +32,7 @@ const FeaturePage = () => {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        // Ensure environments object is initialized
-        const initializedFeatures = data.map((feature: any) => ({
-          ...feature,
-          environments: feature.environments || {
-            UAT: false,
-            Dev: false,
-            Prod: false,
-          },
-        }));
-        setFeatures(initializedFeatures);
+        setFeatures(data);
       } catch (error) {
         console.error("Error fetching features:", error);
       }
@@ -54,7 +45,12 @@ const FeaturePage = () => {
     const newFeature = {
       id: Date.now().toString(),
       name: newFeatureName,
-      environments: { UAT: false, Dev: false, Prod: false },
+      status: false,
+      conditions: [
+        { environment: "Dev", status: false },
+        { environment: "UAT", status: false },
+        { environment: "Prod", status: false },
+      ],
     };
     setCreatedFeature(newFeature);
     setIsDialogOpen(false);

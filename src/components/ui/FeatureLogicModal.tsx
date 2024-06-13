@@ -10,69 +10,22 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-
-// Define the SubscriptionType enum
-enum SubscriptionType {
-  Basic = "Basic",
-  Premium = "Premium",
-  Teams = "Teams",
-  Enterprise = "Enterprise",
-}
+import FeatureTypeSelect from "./featureTypeSelect";
+import { Input } from "./input";
+import { useRouter } from "next/navigation"; // Import the useRouter hook
 
 const FeatureLogicModal = ({ feature, onClose }: any) => {
+  const router = useRouter(); // Initialize the router
   const [selection, setSelection] = useState("Global");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-  const [operator, setOperator] = useState("==");
   const [isUATEnabled, setIsUATEnabled] = useState(false);
   const [isDEVEnabled, setIsDEVEnabled] = useState(false);
   const [isPRODEnabled, setIsPRODEnabled] = useState(false);
-  const [subscriptionType, setSubscriptionType] =
-    useState<SubscriptionType | null>(null);
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
-
-  useEffect(() => {
-    // Reset fields when selection changes
-    setSubscriptionType(null);
-    setSubscriptionId(null);
-    setUserId(null);
-  }, [selection]);
-
-  const handleSelectionChange = (value: string) => {
-    setSelection(value);
-  };
-
-  const handleOperatorChange = (value: string) => {
-    setOperator(value);
-  };
-
-  const handleTagInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTagInput(event.target.value);
-  };
-
-  const handleAddTag = () => {
-    if (tagInput.trim() !== "" && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput("");
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+  const [userId, setUserId] = useState<string | null>(null);
+  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [subscriptionType, setSubscriptionType] = useState<string | null>(null);
 
   const handleConfirm = async () => {
     const environments = [
@@ -106,18 +59,31 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
       }
 
       onClose();
+      location.reload(); // Refresh the page after feature creation
     } catch (error) {
       console.error("Error creating feature:", error);
     }
   };
 
+  const handleSelectionChange = (
+    selection: string,
+    userId: string | null,
+    subscriptionId: string | null,
+    subscriptionType: string | null
+  ) => {
+    setSelection(selection);
+    setUserId(userId);
+    setSubscriptionId(subscriptionId);
+    setSubscriptionType(subscriptionType);
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
       <div className="bg-white dark:bg-black p-6 rounded-lg shadow-lg w-full max-w-md">
-        <Tabs defaultValue="UAT">
+        <Tabs defaultValue="DEV">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="UAT">UAT</TabsTrigger>
             <TabsTrigger value="DEV">DEV</TabsTrigger>
+            <TabsTrigger value="UAT">UAT</TabsTrigger>
             <TabsTrigger value="PROD">PROD</TabsTrigger>
           </TabsList>
           <TabsContent value="UAT">
@@ -139,20 +105,10 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Feature Type</Label>
-                  <Select
-                    onValueChange={handleSelectionChange}
-                    defaultValue={selection}
-                    disabled={!isUATEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select feature type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Global">Global</SelectItem>
-                      <SelectItem value="Subscription">Subscription</SelectItem>
-                      <SelectItem value="User">User</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FeatureTypeSelect
+                    isEnabled={isUATEnabled}
+                    onChange={handleSelectionChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Feature Description</Label>
@@ -163,102 +119,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     disabled={!isUATEnabled}
                   />
                 </div>
-                {selection === "Subscription" && (
-                  <div className="space-y-2">
-                    <Label>Subscription Type</Label>
-                    <Select
-                      onValueChange={(value: SubscriptionType) =>
-                        setSubscriptionType(value)
-                      }
-                      defaultValue={subscriptionType || ""}
-                      disabled={!isUATEnabled}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select subscription type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={SubscriptionType.Basic}>
-                          Basic
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Premium}>
-                          Premium
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Teams}>
-                          Teams
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Enterprise}>
-                          Enterprise
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Label>Subscription ID</Label>
-                    <Input
-                      value={subscriptionId || ""}
-                      onChange={(e) => setSubscriptionId(e.target.value)}
-                      placeholder="Enter subscription ID"
-                      disabled={!isUATEnabled}
-                    />
-                  </div>
-                )}
-                {selection === "User" && (
-                  <div className="space-y-2">
-                    <Label>User ID</Label>
-                    <Input
-                      value={userId || ""}
-                      onChange={(e) => setUserId(e.target.value)}
-                      placeholder="Enter user ID"
-                      disabled={!isUATEnabled}
-                    />
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isUATEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      value={tagInput}
-                      onChange={handleTagInputChange}
-                      placeholder="Add a tag"
-                      disabled={!isUATEnabled}
-                    />
-                    <Button onClick={handleAddTag} disabled={!isUATEnabled}>
-                      Add
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {tags.map((tag) => (
-                      <div
-                        key={tag}
-                        className="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 rounded-md px-2 py-1"
-                      >
-                        <span>{tag}</span>
-                        <X
-                          className="cursor-pointer"
-                          onClick={() => handleRemoveTag(tag)}
-                          size={16}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <p>Logic settings for UAT environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>
@@ -287,20 +147,10 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Feature Type</Label>
-                  <Select
-                    onValueChange={handleSelectionChange}
-                    defaultValue={selection}
-                    disabled={!isDEVEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select feature type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Global">Global</SelectItem>
-                      <SelectItem value="Subscription">Subscription</SelectItem>
-                      <SelectItem value="User">User</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FeatureTypeSelect
+                    isEnabled={isDEVEnabled}
+                    onChange={handleSelectionChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Feature Description</Label>
@@ -311,102 +161,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     disabled={!isDEVEnabled}
                   />
                 </div>
-                {selection === "Subscription" && (
-                  <div className="space-y-2">
-                    <Label>Subscription Type</Label>
-                    <Select
-                      onValueChange={(value: SubscriptionType) =>
-                        setSubscriptionType(value)
-                      }
-                      defaultValue={subscriptionType || ""}
-                      disabled={!isDEVEnabled}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select subscription type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={SubscriptionType.Basic}>
-                          Basic
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Premium}>
-                          Premium
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Teams}>
-                          Teams
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Enterprise}>
-                          Enterprise
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Label>Subscription ID</Label>
-                    <Input
-                      value={subscriptionId || ""}
-                      onChange={(e) => setSubscriptionId(e.target.value)}
-                      placeholder="Enter subscription ID"
-                      disabled={!isDEVEnabled}
-                    />
-                  </div>
-                )}
-                {selection === "User" && (
-                  <div className="space-y-2">
-                    <Label>User ID</Label>
-                    <Input
-                      value={userId || ""}
-                      onChange={(e) => setUserId(e.target.value)}
-                      placeholder="Enter user ID"
-                      disabled={!isDEVEnabled}
-                    />
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isDEVEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      value={tagInput}
-                      onChange={handleTagInputChange}
-                      placeholder="Add a tag"
-                      disabled={!isDEVEnabled}
-                    />
-                    <Button onClick={handleAddTag} disabled={!isDEVEnabled}>
-                      Add
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {tags.map((tag) => (
-                      <div
-                        key={tag}
-                        className="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 rounded-md px-2 py-1"
-                      >
-                        <span>{tag}</span>
-                        <X
-                          className="cursor-pointer"
-                          onClick={() => handleRemoveTag(tag)}
-                          size={16}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <p>Logic settings for DEV environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>
@@ -435,20 +189,10 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Feature Type</Label>
-                  <Select
-                    onValueChange={handleSelectionChange}
-                    defaultValue={selection}
-                    disabled={!isPRODEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select feature type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Global">Global</SelectItem>
-                      <SelectItem value="Subscription">Subscription</SelectItem>
-                      <SelectItem value="User">User</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FeatureTypeSelect
+                    isEnabled={isPRODEnabled}
+                    onChange={handleSelectionChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Feature Description</Label>
@@ -459,102 +203,6 @@ const FeatureLogicModal = ({ feature, onClose }: any) => {
                     disabled={!isPRODEnabled}
                   />
                 </div>
-                {selection === "Subscription" && (
-                  <div className="space-y-2">
-                    <Label>Subscription Type</Label>
-                    <Select
-                      onValueChange={(value: SubscriptionType) =>
-                        setSubscriptionType(value)
-                      }
-                      defaultValue={subscriptionType || ""}
-                      disabled={!isPRODEnabled}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select subscription type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={SubscriptionType.Basic}>
-                          Basic
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Premium}>
-                          Premium
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Teams}>
-                          Teams
-                        </SelectItem>
-                        <SelectItem value={SubscriptionType.Enterprise}>
-                          Enterprise
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Label>Subscription ID</Label>
-                    <Input
-                      value={subscriptionId || ""}
-                      onChange={(e) => setSubscriptionId(e.target.value)}
-                      placeholder="Enter subscription ID"
-                      disabled={!isPRODEnabled}
-                    />
-                  </div>
-                )}
-                {selection === "User" && (
-                  <div className="space-y-2">
-                    <Label>User ID</Label>
-                    <Input
-                      value={userId || ""}
-                      onChange={(e) => setUserId(e.target.value)}
-                      placeholder="Enter user ID"
-                      disabled={!isPRODEnabled}
-                    />
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select
-                    onValueChange={handleOperatorChange}
-                    defaultValue={operator}
-                    disabled={!isPRODEnabled}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="==">==</SelectItem>
-                      <SelectItem value="!=">!=</SelectItem>
-                      <SelectItem value=">">{">"}</SelectItem>
-                      <SelectItem value="<">{"<"}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      value={tagInput}
-                      onChange={handleTagInputChange}
-                      placeholder="Add a tag"
-                      disabled={!isPRODEnabled}
-                    />
-                    <Button onClick={handleAddTag} disabled={!isPRODEnabled}>
-                      Add
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {tags.map((tag) => (
-                      <div
-                        key={tag}
-                        className="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 rounded-md px-2 py-1"
-                      >
-                        <span>{tag}</span>
-                        <X
-                          className="cursor-pointer"
-                          onClick={() => handleRemoveTag(tag)}
-                          size={16}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <p>Logic settings for PROD environment...</p>
               </CardContent>
               <CardFooter className="flex justify-between mt-4">
                 <Button variant="outline" onClick={onClose}>

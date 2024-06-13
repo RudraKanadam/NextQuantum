@@ -42,7 +42,7 @@ model User {
   accounts      Account[]
   subscription  Subscription?  @relation(fields: [subscriptionId], references: [id])
   subscriptionId String?       @unique
-  features      Feature[]      @relation("UserFeatures")
+  userConditions UserCondition[]
 
   @@map("users")
 }
@@ -73,25 +73,52 @@ model Subscription {
   startDate    DateTime         @default(now())
   endDate      DateTime?
   user         User?
-
-  features     Feature[]        @relation("SubscriptionFeatures")
+  subscriptionConditions SubscriptionCondition[]
 
   @@map("subscriptions")
 }
 
 model Feature {
-  id               String          @id @default(cuid())
-  name             String
-  description      String?
-  environment      Environment
-  status           Boolean         @default(false)
-  featureType      FeatureType
-  subscriptionType SubscriptionType?
-  subscriptionId   String?
-  userId           String?
-
-  subscription     Subscription?   @relation("SubscriptionFeatures", fields: [subscriptionId], references: [id])
-  user             User?           @relation("UserFeatures", fields: [userId], references: [id])
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  status      Boolean        @default(false)  // Global activation state of the feature
+  conditions  Condition[]
 
   @@map("features")
+}
+
+model Condition {
+  id                     String                @id @default(cuid())
+  featureId              String
+  environment            Environment
+  featureType            FeatureType
+  status                 Boolean               @default(false)  // Condition-specific activation state
+  feature                Feature               @relation(fields: [featureId], references: [id])
+
+  userCondition          UserCondition?
+  subscriptionCondition  SubscriptionCondition?
+
+  @@map("featureConditions")
+}
+
+model UserCondition {
+  id          String     @id @default(cuid())
+  userId      String
+  conditionId String     @unique
+  user        User       @relation(fields: [userId], references: [id])
+  condition   Condition  @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+
+  @@map("userFeatureConditions")
+}
+
+model SubscriptionCondition {
+  id               String           @id @default(cuid())
+  subscriptionId   String?
+  subscriptionType SubscriptionType?
+  conditionId      String           @unique
+  subscription     Subscription?    @relation(fields: [subscriptionId], references: [id])
+  condition        Condition        @relation(fields: [conditionId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptionFeatureConditions")
 }
