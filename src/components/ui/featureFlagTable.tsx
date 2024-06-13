@@ -1,8 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Switch } from "@/components/ui/switch";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch"; // Import Switch
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import FeatureLogicModal from "./FeatureLogicModal";
+import FeatureEditModal from "./featureEditModal";
 
 type Environment = "UAT" | "Dev" | "Prod";
 
@@ -43,11 +43,10 @@ interface FeatureFlagTableProps {
 }
 
 const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
-  const router = useRouter();
   const [featureList, setFeatureList] = useState(features);
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const [selectedEnv, setSelectedEnv] = useState<Environment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
@@ -108,15 +107,19 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
     setIsDeleteAlertOpen(false);
   };
 
-  const handleToggleClick = (feature: Feature, env: Environment) => {
+  const handleToggleClick = (feature: Feature) => {
     setSelectedFeature(feature);
-    setSelectedEnv(env);
     setIsAlertOpen(true);
   };
 
   const handleLogicClick = (feature: Feature) => {
     setSelectedFeature(feature);
     setIsModalOpen(true);
+  };
+
+  const handleEditClick = (feature: Feature) => {
+    setSelectedFeature(feature);
+    setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (feature: Feature) => {
@@ -126,11 +129,8 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setIsEditModalOpen(false);
     setSelectedFeature(null);
-  };
-
-  const handleRowClick = (featureId: string) => {
-    router.push(`/feature/${featureId}`);
   };
 
   return (
@@ -150,10 +150,9 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
             <tr
               key={feature.id}
               className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-              onClick={() => handleRowClick(feature.id)}
             >
               <td className="py-3 px-6">{feature.name}</td>
-              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+              <td className="py-3 px-6">
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
@@ -182,11 +181,11 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                           condition.environment === "Dev" && condition.status
                       )
                     }
-                    onCheckedChange={() => handleToggleClick(feature, "Dev")}
+                    onCheckedChange={() => handleToggleClick(feature)}
                   />
                 </div>
               </td>
-              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+              <td className="py-3 px-6">
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
@@ -215,11 +214,11 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                           condition.environment === "UAT" && condition.status
                       )
                     }
-                    onCheckedChange={() => handleToggleClick(feature, "UAT")}
+                    onCheckedChange={() => handleToggleClick(feature)}
                   />
                 </div>
               </td>
-              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+              <td className="py-3 px-6">
                 <div className="flex items-center space-x-2">
                   <p
                     className={`text-sm ${
@@ -248,11 +247,11 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                           condition.environment === "Prod" && condition.status
                       )
                     }
-                    onCheckedChange={() => handleToggleClick(feature, "Prod")}
+                    onCheckedChange={() => handleToggleClick(feature)}
                   />
                 </div>
               </td>
-              <td className="py-3 px-6" onClick={(e) => e.stopPropagation()}>
+              <td className="py-3 px-6">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
@@ -262,6 +261,9 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => handleLogicClick(feature)}>
                       Logic
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEditClick(feature)}>
+                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleDeleteClick(feature)}
@@ -280,6 +282,10 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
         <FeatureLogicModal feature={selectedFeature} onClose={closeModal} />
       )}
 
+      {isEditModalOpen && selectedFeature && (
+        <FeatureEditModal featureId={selectedFeature.id} onClose={closeModal} />
+      )}
+
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -287,9 +293,7 @@ const FeatureFlagTable: React.FC<FeatureFlagTableProps> = ({ features }) => {
             <AlertDialogDescription>
               {`Are you sure you want to ${
                 selectedFeature?.status ? "turn off" : "turn on"
-              } the feature ${selectedFeature?.name} for ${
-                selectedEnv ? selectedEnv : "this"
-              } environment?`}
+              } the feature ${selectedFeature?.name} for this environment?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

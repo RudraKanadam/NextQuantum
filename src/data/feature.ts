@@ -94,7 +94,14 @@ export const getFeatureById = async (id: string) => {
   try {
     const feature = await db.feature.findUnique({
       where: { id },
-      include: { conditions: true },
+      include: {
+        conditions: {
+          include: {
+            userCondition: true,
+            subscriptionCondition: true,
+          },
+        },
+      },
     });
     return feature;
   } catch (error) {
